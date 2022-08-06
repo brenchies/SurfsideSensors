@@ -2,13 +2,13 @@
 #include "PMS.h"
 #include "SoftwareSerial.h"
 
+#define SAMPLES 5
 #define mS_TO_S_FACTOR 1000  /* Conversion factor for micro seconds to seconds */
 #define ESP_SLEEP_INTERVAL_IN_MIN(x) (x * 60 * mS_TO_S_FACTOR)   
 #define PMS_STARTUP_DELAY_IN_SEC(x) delay((x * mS_TO_S_FACTOR))  
 
 #define TERMINAL_OUT Serial //For debugging on serial monitor
 const int RESET = 13;
-#define ONE_BY_ONE_TEST
 
 #define PMS1
 #define PMS2
@@ -104,16 +104,14 @@ void readData(PMS *pms, SoftwareSerial *Serial_PM)
   pms->requestRead();
 
   TERMINAL_OUT.println("Reading data...");
-  if (pms->readUntil(data))
+  if (pms->readUntil(data, SAMPLES))
   {
     TERMINAL_OUT.println();
     TERMINAL_OUT.println(pms->getName());
     TERMINAL_OUT.print("PM 1.0 (ug/m3): ");
     TERMINAL_OUT.println(data.PM_AE_UG_1_0);
-
     TERMINAL_OUT.print("PM 2.5 (ug/m3): ");
     TERMINAL_OUT.println(data.PM_AE_UG_2_5);
-
     TERMINAL_OUT.print("PM 10.0 (ug/m3): ");
     TERMINAL_OUT.println(data.PM_AE_UG_10_0);
 
