@@ -38,10 +38,11 @@ String name_pms2 = "PMS 2";
 PMS pms2(Serial_PM2, &name_pms2);
 #endif
 
-void readData(PMS*, SoftwareSerial*);
+String readData(PMS*, SoftwareSerial*);
 
 void setup()
 {
+  String measurements;
   pinMode(RESET, OUTPUT);
   digitalWrite(RESET, HIGH);
 
@@ -63,14 +64,16 @@ void setup()
   pms1.passiveMode();
   pms1.wakeUp();
   PMS_STARTUP_DELAY_IN_SEC(30);
-  readData(&pms1, &Serial_PM1);
+  measurements = readData(&pms1, &Serial_PM1);
+  TERMINAL_OUT.println(measurements);
   pms1.sleep();
   #endif
  
   #ifdef PMS2
   pms2.passiveMode();
   pms2.wakeUp();
-  readData(&pms2, &Serial_PM2);
+  measurements = readData(&pms2, &Serial_PM2);
+  TERMINAL_OUT.println(measurements);
   pms2.sleep();
   #endif
 
@@ -95,8 +98,9 @@ void loop()
  * @param pms selected PMS sensor object
  * @param Serial_PM selected SoftwareSerial port object
  */
-void readData(PMS *pms, SoftwareSerial *Serial_PM)
+String readData(PMS *pms, SoftwareSerial *Serial_PM)
 {
+  String message;
   PMS::DATA data;
   //Clear buffer (does a burst read to remove potentially old data) before read. Some data could have been also sent before switching to passive mode.
   while (Serial_PM->available()) { Serial_PM->read(); }
@@ -106,19 +110,29 @@ void readData(PMS *pms, SoftwareSerial *Serial_PM)
   TERMINAL_OUT.println("Reading data...");
   if (pms->readUntil(data, SAMPLES))
   {
-    TERMINAL_OUT.println();
-    TERMINAL_OUT.println(pms->getName());
-    TERMINAL_OUT.print("PM 1.0 (ug/m3): ");
-    TERMINAL_OUT.println(data.PM_AE_UG_1_0);
-    TERMINAL_OUT.print("PM 2.5 (ug/m3): ");
-    TERMINAL_OUT.println(data.PM_AE_UG_2_5);
-    TERMINAL_OUT.print("PM 10.0 (ug/m3): ");
-    TERMINAL_OUT.println(data.PM_AE_UG_10_0);
+    // TERMINAL_OUT.println();
+    // TERMINAL_OUT.println(pms->getName());
+    // TERMINAL_OUT.print("PM 1.0 (ug/m3): ");
+    // TERMINAL_OUT.println(data.PM_AE_UG_1_0);
+    // TERMINAL_OUT.print("PM 2.5 (ug/m3): ");
+    // TERMINAL_OUT.println(data.PM_AE_UG_2_5);
+    // TERMINAL_OUT.print("PM 10.0 (ug/m3): ");
+    // TERMINAL_OUT.println(data.PM_AE_UG_10_0);
 
     TERMINAL_OUT.println();
+    String pm1_0 = String(data.PM_SP_UG_1_0);
+    String pm2_5 = String(data.PM_SP_UG_2_5);
+    String pm10_0 = String(data.PM_SP_UG_10_0);
+
+    message = "[";
+    message += "{'sensorName':'PM 1.0("+String(pms->getName())+"),'value'"+pm1_0+"'μg/m³'}"
+              +"{'sensorName':'PM 2.5("+String(pms->getName())+"),'value'"+pm2_5+"'μg/m³'}"
+              +"{'sensorName':'PM 10.0("+String(pms->getName())+"),'value'"+pm2_5+"'μg/m³'} ]";
   }
   else
   {
-    TERMINAL_OUT.println("No data.");
+    message = "no data";
   }
+  
+  return message;
 }

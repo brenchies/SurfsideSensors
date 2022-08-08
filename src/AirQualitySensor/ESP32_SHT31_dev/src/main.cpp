@@ -32,7 +32,7 @@ PMS pms2(Serial_PM2, &name_pms2);
 #endif
 
 
-void readData(PMS*, SoftwareSerial*);
+void readData(PMS*, SoftwareSerial*, String *data);
 
 //
 //    FILE: SHT31_isConnected.ino
@@ -80,8 +80,9 @@ void setup()
 
 void loop()
 {
-  readData(&pms1, &Serial_PM1);
-  readData(&pms2, &Serial_PM2);
+  String data1, data2;
+  readData(&pms1, &Serial_PM1, &data1);
+  readData(&pms2, &Serial_PM2, &data2);
 
   if ( sht.isConnected()  )
   {
@@ -109,7 +110,7 @@ void loop()
   delay(5000);
 }
 
-void readData(PMS *pms, SoftwareSerial *Serial_PM)
+void readData(PMS *pms, SoftwareSerial *Serial_PM, String *data_pm)
 {
   PMS::DATA data;
   //Clear buffer (does a burst read to remove potentially old data) before read. Some data could have been also sent before switching to passive mode.
@@ -129,6 +130,7 @@ void readData(PMS *pms, SoftwareSerial *Serial_PM)
     Serial.print("PM 10.0 (ug/m3): ");
     Serial.println(data.PM_AE_UG_10_0);
 
+    *data_pm = 
     Serial.println();
   }
   else

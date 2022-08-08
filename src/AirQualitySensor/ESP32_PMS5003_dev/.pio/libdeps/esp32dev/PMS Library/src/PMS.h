@@ -6,7 +6,7 @@ class PMS
 {
 public:
 
-  String getName();
+ 
   static const uint16_t SINGLE_RESPONSE_TIME = 1000;
   static const uint16_t TOTAL_RESPONSE_TIME = 1000 * 10;
   static const uint16_t STEADY_RESPONSE_TIME = 1000 * 30;
@@ -26,7 +26,8 @@ public:
     uint16_t PM_AE_UG_10_0;
   };
 
-  PMS(Stream &, String *);
+  PMS(Stream &, String *); 
+  String getName();
   void sleep();
   void wakeUp();
   void activeMode();
