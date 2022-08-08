@@ -130,31 +130,4 @@
  .pio/libdeps/esp32dev/PMS\ Library/src/PMS.h \
  .pio/libdeps/esp32dev/EspSoftwareSerial/src/SoftwareSerial.h \
  .pio/libdeps/esp32dev/EspSoftwareSerial/src/circular_queue/circular_queue.h \
- .pio/libdeps/esp32dev/EspSoftwareSerial/src/circular_queue/Delegate.h \
- lib/TinyGSMWrapper/tinygsmwrapper.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGSM.h \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmClient.h \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmClientSIM7000.h \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmClientSIM70xx.h \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmBattery.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmCommon.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/cores/esp32/Client.h \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmGPRS.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmGPS.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmModem.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmSMS.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmTime.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmNTP.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmGSMLocation.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmTCP.tpp \
- .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmFifo.h \
- lib/ArduinoHttpClient-master/src/ArduinoHttpClient.h \
- lib/ArduinoHttpClient-master/src/HttpClient.h \
- lib/ArduinoHttpClient-master/src/WebSocketClient.h \
- lib/ArduinoHttpClient-master/src/URLEncoder.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/SD/src/SD.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/FS/src/FS.h \
- C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/SD/src/sd_defines.h
+ .pio/libdeps/esp32dev/EspSoftwareSerial/src/circular_queue/Delegate.h

@@ -130,12 +130,6 @@ void readData(PMS *pms, SoftwareSerial *Serial_PM, String *data_pm)
     Serial.print("PM 10.0 (ug/m3): ");
     Serial.println(data.PM_AE_UG_10_0);
 
-     String data = "[";
-         data += "{'sensorName':'DISSOLVED_OXYGEN','value':"+String(DO_VAL)+",'unit':'mg/L'},";
-         data += "{'sensorName':'CONDUCTIVITY','value':"+String(EC_VAL)+",'unit':'μS/cm'},";
-         data += "{'sensorName':'TEMPERATURE','value':"+String(RTD_VAL)+",'unit':'°C'},";
-         data += "{'sensorName':'PH','value':"+String(PH_VAL)+",'unit':'NAN'},";
-
     *data_pm = 
     Serial.println();
   }
