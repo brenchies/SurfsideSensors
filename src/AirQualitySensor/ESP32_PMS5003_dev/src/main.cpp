@@ -62,7 +62,7 @@ String readData(PMS*, SoftwareSerial*);
 #define HAS_SENSOR_ENABLE
 #ifdef HAS_SENSOR_ENABLE
   #define SENSOR_ENABLE_PIN 13
-  #define SENSOR_STABILIZE_PERIOD_US 3000
+  #define SENSOR_STABILIZE_PERIOD_US 30000
 #endif
 
 // battery
