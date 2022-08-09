@@ -25,10 +25,10 @@ class ezo_rtd_i2c: public Ezo_board{
     int ENABLEPIN = 0;
     int averagingSamples = 1;
 
-    void begin(int enablePin=13, uint8_t address=0x66, oversamples=10, String sensorName=""){
+    void begin(int enablePin=13, uint8_t address=0x66, int oversamples=10, String sensorName=""){
         ENABLEPIN = enablePin;
         i2c_address = address;
-        averagingSamples = 
+        averagingSamples = oversamples;
     };
     void getSamples();
     void calibrate();
