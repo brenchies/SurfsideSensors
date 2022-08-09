@@ -2,8 +2,11 @@
 #include "PMS.h"
 #include "SoftwareSerial.h"
 #include "StreamDebugger.h"
+#define PMS_CODE
+#define MAIN
 
-
+//PMSCode
+#ifdef PMS_CODE
 #define SAMPLES 5
 #define mS_TO_S_FACTOR 1000  /* Conversion factor for micro seconds to seconds */
 #define ESP_SLEEP_INTERVAL_IN_MIN(x) (x * 60 * mS_TO_S_FACTOR)   
@@ -41,9 +44,11 @@ PMS pms2(Serial_PM2, &name_pms2);
 #endif
 
 String readData(PMS*, SoftwareSerial*);
+#endif
 
-
-#include <tinygsmwrapper.h>
+//Main: declaration Settings LillyGO
+#ifdef MAIN
+#include "TinyGSM_Wrapper.h"
 #define SENSOR_SAMPLES 10
 #define MONITORID "AIR_QUALITY_01"
 //voltage sensors
@@ -62,10 +67,13 @@ String readData(PMS*, SoftwareSerial*);
 #define HAS_SENSOR_ENABLE
 #ifdef HAS_SENSOR_ENABLE
   #define SENSOR_ENABLE_PIN 13
-  #define SENSOR_STABILIZE_PERIOD_US 3000
+  #define SENSOR_STABILIZE_PERIOD_US 40000
+#endif
 #endif
 
-// battery
+
+//Main: Functions solar/batt LillyGO
+#ifdef MAIN
 #ifdef BATTERY_VSENSE_PIN
   float getBatteryVoltage(float samples=10){
     float voltage = 0.0;
@@ -77,6 +85,7 @@ String readData(PMS*, SoftwareSerial*);
     return voltage;
   }
 #endif
+
 
 // solar
 #ifdef SOLAR_VSENSE_PIN
@@ -90,11 +99,15 @@ String readData(PMS*, SoftwareSerial*);
     return voltage;
   }
 #endif
+#endif
+
 
 
 // GPRS RSSI
 #define REPORT_GSM_RSSI
 
+//MAIN: SD_CARD defs, SD_CARD FUNCTIONS, READ/WRITE
+#ifdef MAIN
 //sdcard
 #define HAS_SDCARD
 #ifdef HAS_SDCARD
@@ -108,7 +121,7 @@ String readData(PMS*, SoftwareSerial*);
   bool SD_CARD_MOUNTED = false;
   String FileName = String(MONITORID)+".txt";
   File myFile;
-
+#endif
   int writeToSD(String data){
     if (SD_CARD_MOUNTED){
       Serial.println("writing to sd card");
@@ -166,8 +179,8 @@ void SET_TO_SLEEP(uint32_t time_us){
 }
 #endif
 
-
-
+//MAIN: Deep Sleep function
+#ifdef MAIN
 void doSleepCycle(uint32_t time_us = 1000000 * 5)
 {// close all communication busses before sleeping
   SPI.end();
@@ -180,10 +193,13 @@ void doSleepCycle(uint32_t time_us = 1000000 * 5)
   // SET_TO_SLEEP(time_us);
   ESP.deepSleep(time_us);
 }
+ #endif
 
 
 void setup()
 {
+//SD CARD, SOLAR, BATT
+#ifdef MAIN
 Serial.begin(115200);
   // sensor enable power
 #ifdef HAS_SENSOR_ENABLE
@@ -221,11 +237,11 @@ Serial.begin(115200);
     }
   #endif
 #endif
+#endif
 
+//PMS : Begin()
+#ifdef PMS_CODE
   String measurements;
-  Serial.println("plug in sensors");
-  delay(30000);
-  Serial.println("Initializing...");
 
   #ifdef PMS1
   Serial_PM1.begin(9600, SWSERIAL_8N1, RX1, TX1, false, 192);
@@ -246,12 +262,13 @@ Serial.begin(115200);
   pms2.passiveMode();
   pms2.wakeUp();
   #endif
-
+#endif
 //Default state after sensor power, but undefined after ESP restart e.g. by OTA flash, so we have to manually wake up the sensor for sure.
 //Some logs from bootloader is sent via Serial port to the sensor after power up. This can cause invalid first read or wake up so be patient and wait for next read cycle.
- 
 }
 
+//MAIN : void loop
+#ifdef MAIN
 void loop()
 {
 
@@ -300,7 +317,10 @@ void loop()
   #endif
  doSleepCycle();
 }
+#endif
 
+//PMS: Read function
+#ifdef PMS_CODE
 /**
  * @brief While UART connection between ESP32 and PMS sensor is stable.
  * A " read request " is sent to the PMS sensor. The PMS sensor then sends
@@ -321,15 +341,6 @@ String readData(PMS *pms, SoftwareSerial *Serial_PM)
   Serial.println("Reading data...");
   if (pms->readUntil(data, SAMPLES))
   {
-    // Serial.println();
-    // Serial.println(pms->getName());
-    // Serial.print("PM 1.0 (ug/m3): ");
-    // Serial.println(data.PM_AE_UG_1_0);
-    // Serial.print("PM 2.5 (ug/m3): ");
-    // Serial.println(data.PM_AE_UG_2_5);
-    // Serial.print("PM 10.0 (ug/m3): ");
-    // Serial.println(data.PM_AE_UG_10_0);
-
     Serial.println();
     String pm1_0 = String(data.PM_SP_UG_1_0);
     String pm2_5 = String(data.PM_SP_UG_2_5);
@@ -346,3 +357,4 @@ String readData(PMS *pms, SoftwareSerial *Serial_PM)
   
   return message;
 }
+#endif

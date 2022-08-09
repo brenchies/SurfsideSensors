@@ -132,7 +132,7 @@
  .pio/libdeps/esp32dev/EspSoftwareSerial/src/circular_queue/circular_queue.h \
  .pio/libdeps/esp32dev/EspSoftwareSerial/src/circular_queue/Delegate.h \
  .pio/libdeps/esp32dev/StreamDebugger-master/StreamDebugger.h \
- include/tinygsmwrapper.h \
+ include/TinyGSM_Wrapper.h \
  C:/Users/seand/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
  .pio/libdeps/esp32dev/TinyGSM/src/TinyGSM.h \
  .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmClient.h \
