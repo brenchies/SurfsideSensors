@@ -4,13 +4,9 @@
 #ifndef SURFSIDESCIENCE_H
 #define SURFSIDESCIENCE_H
 #endif
-// #include <tinygsmwrapper.h>
 
-
-// #include <surfscienceenums.h>
-
-#define SUCCESS 1
-#define ERROR -1
+int SUCCESS = 1;
+int ERROR = -1;
 
 
 class surfSideScience{
@@ -116,7 +112,7 @@ class surfSideScience{
     template <typename sensorType>
     void sampleSensor(sensorType sensor){
         float *data;
-        sensor.updateSample();
+        sensor.getSamples();
         int numberOfreadings = sensor.numberOfreadings;
         for (int i = 0; i < numberOfreadings; i++){
             if(sensor.sampleStatus[i]== ERROR){
@@ -144,7 +140,7 @@ class surfSideScience{
             Modem.postData(payload);
             if(Modem.status == ERROR){
                 payloadPosted = true;
-                errorBuffer += "{sensorName: "+Modem.deviceName+","+Modem.errorBuffer+"},";
+                errorBuffer += "{: "+Modem.deviceName+","+Modem.errorBuffer+"},";
             }
         }
         Modem.disableModem();
