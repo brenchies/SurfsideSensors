@@ -3,9 +3,10 @@
 #include "SoftwareSerial.h"
 #include "StreamDebugger.h"
 #define PMS_CODE
+#define SHT31_
 #define MAIN
 
-//PMSCode
+//PMSCode Defs
 #ifdef PMS_CODE
 #define SAMPLES 5
 #define mS_TO_S_FACTOR 1000  /* Conversion factor for micro seconds to seconds */
@@ -43,7 +44,23 @@ String name_pms2 = "PMS 2";
 PMS pms2(Serial_PM2, &name_pms2);
 #endif
 
-String readData(PMS*, SoftwareSerial*);
+String readPMS_data(PMS*, SoftwareSerial*);
+#endif
+
+//SHT31 Code defs
+#ifdef SHT31_
+#include "Wire.h"
+#include "SHT31.h"
+
+#define SHT31_ADDRESS   0x44
+
+#ifdef SHT31_
+
+uint32_t start;
+uint32_t stop;
+SHT31 sht;
+String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
+#endif
 #endif
 
 //Main: declaration Settings LillyGO
@@ -265,6 +282,8 @@ Serial.begin(115200);
 #endif
 //Default state after sensor power, but undefined after ESP restart e.g. by OTA flash, so we have to manually wake up the sensor for sure.
 //Some logs from bootloader is sent via Serial port to the sensor after power up. This can cause invalid first read or wake up so be patient and wait for next read cycle.
+ 
+
 }
 
 //MAIN : void loop
@@ -279,8 +298,9 @@ void loop()
   String data;
   uint32_t timer = millis();
   int err = 0;
-  String data1 = readData(&pms1, &Serial_PM1);
-  String data2 = readData(&pms2, &Serial_PM2);
+  String data1 = readPMS_data(&pms1, &Serial_PM1);
+  String data2 = readPMS_data(&pms2, &Serial_PM2);
+  String data3 = ReadSHT31_data(&sht, &start, &stop);
   Serial.println("Sensor read delay: "+String(millis() - timer));
   #ifdef HAS_SENSOR_ENABLE
     digitalWrite(SENSOR_ENABLE_PIN, LOW);
@@ -300,6 +320,8 @@ void loop()
     payload += data1;
     payload += ",";
     payload += data2;
+    // payload += ",";
+    // payload += data3;
     payload += "]}";
     payload.replace("'", String('"'));
     err = mysim.post("surfside-db.brenchies.com",80,"/observations", payload,"application/json");
@@ -329,7 +351,7 @@ void loop()
  * @param pms selected PMS sensor object
  * @param Serial_PM selected SoftwareSerial port object
  */
-String readData(PMS *pms, SoftwareSerial *Serial_PM)
+String readPMS_data(PMS *pms, SoftwareSerial *Serial_PM)
 {
   String message;
   PMS::DATA data;
@@ -355,6 +377,24 @@ String readData(PMS *pms, SoftwareSerial *Serial_PM)
     message = "no data";
   }
   
+  return message;
+}
+
+String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop)
+{
+  String message;
+  if (sht31->isConnected())
+  {
+    *start = micros();
+    bool b = sht31->read();         // default = true/fast       slow = false
+    *stop = micros();
+    message +="{'sensorName':'Temperature','value':"+String(sht31->getTemperature())+",'unit':'°C'},"
+             +"{'sensorName':'Humiditty','value':"+String(sht31->getHumidity())+",'unit':'%'}";
+  }
+  else
+  {
+    message ="Not connected";
+  }
   return message;
 }
 #endif
