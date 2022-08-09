@@ -17,7 +17,7 @@
 
 #define SerialMon Serial
 #define SerialAT Serial1
-// #define TinyGSMDEBUG
+#define TinyGSMDEBUG
 #ifndef TinyGSMDEBUG
     TinyGsm modem(SerialAT);
     TinyGsmClient client(modem);

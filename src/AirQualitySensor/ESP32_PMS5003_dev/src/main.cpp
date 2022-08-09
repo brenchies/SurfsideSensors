@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "PMS.h"
 #include "SoftwareSerial.h"
+#include "StreamDebugger.h"
 
 
 #define SAMPLES 5
@@ -44,7 +45,7 @@ String readData(PMS*, SoftwareSerial*);
 
 #include <tinygsmwrapper.h>
 #define SENSOR_SAMPLES 10
-#define MONITORID "WATER_QUALITY_01"
+#define MONITORID "AIR_QUALITY_01"
 //voltage sensors
 #define HAS_SOLAR_VSENSE
 #define HAS_BATTERY_VSENSE
@@ -223,7 +224,7 @@ Serial.begin(115200);
 
   String measurements;
   Serial.println("plug in sensors");
-  delay(5000);
+  delay(30000);
   Serial.println("Initializing...");
 
   #ifdef PMS1
@@ -334,9 +335,9 @@ String readData(PMS *pms, SoftwareSerial *Serial_PM)
     String pm2_5 = String(data.PM_SP_UG_2_5);
     String pm10_0 = String(data.PM_SP_UG_10_0);
 
-    message += "{'sensorName':'PM 1.0("+String(pms->getName())+"),'value'"+pm1_0+"'μg/m³'}"
-              +"{'sensorName':'PM 2.5("+String(pms->getName())+"),'value'"+pm2_5+"'μg/m³'}"
-              +"{'sensorName':'PM 10.0("+String(pms->getName())+"),'value'"+pm2_5+"'μg/m³'}";
+    message +="{'sensorName':'PM 1.0("+String(pms->getName())+")','value':"+pm1_0+",'unit':'μg/m³'},"
+              +"{'sensorName':'PM 2.5("+String(pms->getName())+")','value':"+pm2_5+",'unit':'μg/m³'},"
+              +"{'sensorName':'PM 10.0("+String(pms->getName())+")','value':"+pm2_5+",'unit':'μg/m³'}";
   }
   else
   {
