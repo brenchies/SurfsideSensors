@@ -2,12 +2,9 @@
 #include "PMS.h"
 #include "SoftwareSerial.h"
 #include "StreamDebugger.h"
-#define PMS_CODE
-#define SHT31_
-#define MAIN
+#include "Wire.h"
 
-//PMSCode Defs
-#ifdef PMS_CODE
+
 #define SAMPLES 5
 #define mS_TO_S_FACTOR 1000  /* Conversion factor for micro seconds to seconds */
 #define ESP_SLEEP_INTERVAL_IN_MIN(x) (x * 60 * mS_TO_S_FACTOR)   
@@ -44,28 +41,22 @@ String name_pms2 = "PMS 2";
 PMS pms2(Serial_PM2, &name_pms2);
 #endif
 
-String readPMS_data(PMS*, SoftwareSerial*);
-#endif
+String readData(PMS*, SoftwareSerial*);
 
-//SHT31 Code defs
-#ifdef SHT31_
-#include "Wire.h"
+
 #include "SHT31.h"
 
 #define SHT31_ADDRESS   0x44
 
-#ifdef SHT31_
-
 uint32_t start;
 uint32_t stop;
-SHT31 sht;
-String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
-#endif
-#endif
 
-//Main: declaration Settings LillyGO
-#ifdef MAIN
-#include "TinyGSM_Wrapper.h"
+SHT31 sht;
+
+String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
+
+
+#include "tinygsmwrapper.h"
 #define SENSOR_SAMPLES 10
 #define MONITORID "AIR_QUALITY_01"
 //voltage sensors
@@ -84,13 +75,10 @@ String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
 #define HAS_SENSOR_ENABLE
 #ifdef HAS_SENSOR_ENABLE
   #define SENSOR_ENABLE_PIN 13
-  #define SENSOR_STABILIZE_PERIOD_US 40000
-#endif
+  #define SENSOR_STABILIZE_PERIOD_US 30000
 #endif
 
-
-//Main: Functions solar/batt LillyGO
-#ifdef MAIN
+// battery
 #ifdef BATTERY_VSENSE_PIN
   float getBatteryVoltage(float samples=10){
     float voltage = 0.0;
@@ -102,7 +90,6 @@ String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
     return voltage;
   }
 #endif
-
 
 // solar
 #ifdef SOLAR_VSENSE_PIN
@@ -116,15 +103,11 @@ String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
     return voltage;
   }
 #endif
-#endif
-
 
 
 // GPRS RSSI
 #define REPORT_GSM_RSSI
 
-//MAIN: SD_CARD defs, SD_CARD FUNCTIONS, READ/WRITE
-#ifdef MAIN
 //sdcard
 #define HAS_SDCARD
 #ifdef HAS_SDCARD
@@ -138,7 +121,7 @@ String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
   bool SD_CARD_MOUNTED = false;
   String FileName = String(MONITORID)+".txt";
   File myFile;
-#endif
+
   int writeToSD(String data){
     if (SD_CARD_MOUNTED){
       Serial.println("writing to sd card");
@@ -196,8 +179,8 @@ void SET_TO_SLEEP(uint32_t time_us){
 }
 #endif
 
-//MAIN: Deep Sleep function
-#ifdef MAIN
+
+
 void doSleepCycle(uint32_t time_us = 1000000 * 5)
 {// close all communication busses before sleeping
   SPI.end();
@@ -210,13 +193,12 @@ void doSleepCycle(uint32_t time_us = 1000000 * 5)
   // SET_TO_SLEEP(time_us);
   ESP.deepSleep(time_us);
 }
- #endif
 
 
 void setup()
 {
-//SD CARD, SOLAR, BATT
-#ifdef MAIN
+  sht.begin(SHT31_ADDRESS);
+
 Serial.begin(115200);
   // sensor enable power
 #ifdef HAS_SENSOR_ENABLE
@@ -254,11 +236,11 @@ Serial.begin(115200);
     }
   #endif
 #endif
-#endif
 
-//PMS : Begin()
-#ifdef PMS_CODE
   String measurements;
+  Serial.println("plug in sensors");
+  delay(30000);
+  Serial.println("Initializing...");
 
   #ifdef PMS1
   Serial_PM1.begin(9600, SWSERIAL_8N1, RX1, TX1, false, 192);
@@ -279,15 +261,12 @@ Serial.begin(115200);
   pms2.passiveMode();
   pms2.wakeUp();
   #endif
-#endif
+
 //Default state after sensor power, but undefined after ESP restart e.g. by OTA flash, so we have to manually wake up the sensor for sure.
 //Some logs from bootloader is sent via Serial port to the sensor after power up. This can cause invalid first read or wake up so be patient and wait for next read cycle.
  
-
 }
 
-//MAIN : void loop
-#ifdef MAIN
 void loop()
 {
 
@@ -298,8 +277,8 @@ void loop()
   String data;
   uint32_t timer = millis();
   int err = 0;
-  String data1 = readPMS_data(&pms1, &Serial_PM1);
-  String data2 = readPMS_data(&pms2, &Serial_PM2);
+  String data1 = readData(&pms1, &Serial_PM1);
+  String data2 = readData(&pms2, &Serial_PM2);
   String data3 = ReadSHT31_data(&sht, &start, &stop);
   Serial.println("Sensor read delay: "+String(millis() - timer));
   #ifdef HAS_SENSOR_ENABLE
@@ -320,8 +299,8 @@ void loop()
     payload += data1;
     payload += ",";
     payload += data2;
-    // payload += ",";
-    // payload += data3;
+    payload += ",";
+    payload += data3;
     payload += "]}";
     payload.replace("'", String('"'));
     err = mysim.post("surfside-db.brenchies.com",80,"/observations", payload,"application/json");
@@ -339,10 +318,7 @@ void loop()
   #endif
  doSleepCycle();
 }
-#endif
 
-//PMS: Read function
-#ifdef PMS_CODE
 /**
  * @brief While UART connection between ESP32 and PMS sensor is stable.
  * A " read request " is sent to the PMS sensor. The PMS sensor then sends
@@ -351,7 +327,7 @@ void loop()
  * @param pms selected PMS sensor object
  * @param Serial_PM selected SoftwareSerial port object
  */
-String readPMS_data(PMS *pms, SoftwareSerial *Serial_PM)
+String readData(PMS *pms, SoftwareSerial *Serial_PM)
 {
   String message;
   PMS::DATA data;
@@ -363,6 +339,7 @@ String readPMS_data(PMS *pms, SoftwareSerial *Serial_PM)
   Serial.println("Reading data...");
   if (pms->readUntil(data, SAMPLES))
   {
+
     Serial.println();
     String pm1_0 = String(data.PM_SP_UG_1_0);
     String pm2_5 = String(data.PM_SP_UG_2_5);
@@ -389,7 +366,7 @@ String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop)
     bool b = sht31->read();         // default = true/fast       slow = false
     *stop = micros();
     message +="{'sensorName':'Temperature','value':"+String(sht31->getTemperature())+",'unit':'°C'},"
-             +"{'sensorName':'Humiditty','value':"+String(sht31->getHumidity())+",'unit':'%'}";
+             +"{'sensorName':'Humidity','value':"+String(sht31->getHumidity())+",'unit':'%'}";
   }
   else
   {
@@ -397,4 +374,3 @@ String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop)
   }
   return message;
 }
-#endif

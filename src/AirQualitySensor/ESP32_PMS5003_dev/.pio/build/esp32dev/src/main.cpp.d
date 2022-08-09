@@ -134,7 +134,7 @@
  .pio/libdeps/esp32dev/StreamDebugger-master/StreamDebugger.h \
  C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
  C:/Users/seand/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
- .pio/libdeps/esp32dev/SHT31/SHT31.h include/TinyGSM_Wrapper.h \
+ .pio/libdeps/esp32dev/SHT31/SHT31.h include/tinygsmwrapper.h \
  C:/Users/seand/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
  .pio/libdeps/esp32dev/TinyGSM/src/TinyGSM.h \
  .pio/libdeps/esp32dev/TinyGSM/src/TinyGsmClient.h \

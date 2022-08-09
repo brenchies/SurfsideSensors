@@ -1,5 +1,5 @@
-#ifndef TINYGSM_WRAPPER_H
-#define TINYGSM_WRAPPER_H
+#ifndef TINYGSMWRAPPER_H
+#define TINYGSMWRAPPER_H
 #endif
 #include <Arduino.h>
 #include <HardwareSerial.h>
