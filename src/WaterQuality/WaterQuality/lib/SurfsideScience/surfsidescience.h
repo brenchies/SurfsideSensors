@@ -4,13 +4,13 @@
 #ifndef SURFSIDESCIENCE_H
 #define SURFSIDESCIENCE_H
 #endif
+// #include <tinygsmwrapper.h>
 
 
 // #include <surfscienceenums.h>
 
 #define SUCCESS 1
 #define ERROR -1
-
 
 
 class surfSideScience{
@@ -33,25 +33,25 @@ class surfSideScience{
     String errorBuffer="";
 
     /**
-     * @brief payload
-     * 
-     */
-    String SDtempData="";
-    /**
      * @brief payload = {
      *                  'deviceName':'id',
      *                  'timestamp':'ISO 8601',
      *                  'sensors': {sensor data}
      *                   }     * 
      */
-    String payload="";
+    String payload="{'deviceName':'WATER_QUALITY_01','timestamp':'2022-08-09 18:11:04.000-4:00','sensors':[{'sensorName':'DISSOLVED_OXYGEN','value':1.97,'unit':'mg/L'},{'sensorName':'CONDUCTIVITY','value':0.00,'unit':'μS/cm'},{'sensorName':'TEMPERATURE','value':0.00,'unit':'°C'},{'sensorName':'PH','value':0.00,'unit':'NAN'},{'sensorName':'RSSI','value':31,'unit':'NAN'},{'sensorName':'SOLAR_VIN','value':3179.96,'unit':'mV'},{'sensorName':'BATTERY_VIN','value':0.00,'unit':'mV'}]}";
+
+    /**
+     * @brief flag for posted data
+     * 
+     */
+    bool payloadPosted = false;
     /**
      * @brief sensor data in json "{'sensorName':'','value': val,'unit': unt},...,{dataN}"
      * 
      */
     String sensorsData="";
     
-
     /**
      * @brief Construct a new surf Side Science object
      * 
@@ -72,8 +72,8 @@ class surfSideScience{
      * @tparam T object type
      * @param sensors objects
      */
-    template<typename... T>
-    void processSensors(T... sensors...){
+    template<typename... sensorType>
+    void processSensors(sensorType... sensors...){
         (enableSensor(sensors), ...);
         delay(sensorStabilizeDelay);
         (sampleSensor(sensors), ...);
@@ -86,8 +86,8 @@ class surfSideScience{
      * @tparam T object type
      * @param sensor 
      */
-    template <typename T>
-    void enableSensor(T sensor){
+    template <typename sensorType>
+    void enableSensor(sensorType sensor){
         sensor.enableSensor();
         if (sensor.sensorStabilizeDelay > sensorStabilizeDelay)
             {
@@ -102,43 +102,53 @@ class surfSideScience{
      * @tparam T 
      * @param sensor 
      */
-    template <typename T>
-    void stopSensor(T sensor){
+    template <typename sensorType>
+    void stopSensor(sensorType sensor){
         sensor.disableSensor();
     }
 
     /**
-     * @brief read sensor copy error data to buffer
+     * @brief read sensordata, log error if any
      * 
      * @tparam T 
      * @param sensor 
      */
-    template <typename T>
-    void sampleSensor(T sensor){
+    template <typename sensorType>
+    void sampleSensor(sensorType sensor){
         float *data;
-        sensor.getSample(&data);
-        if (sensor.status == ERROR){
-            errorBuffer += "{sensorName: "+sensor.sensorName+","+sensor.errorBuffer+"},";
-        }
-
-    }
-
-    template <typename T>
-    int uploadData(T modem){
-        modem.enableModem();
-        modem.begin();
-        modem.establishConnection();
-        modem.getTime();
-        generatePayload(modem.dateTime);
-
-        if (modem.status == ERROR){
-            errorBuffer += "{deviceName: "+modem.deviceName+","+modem.errorBuffer+"},";
-        }else{
-            modem.uploadData(payload);
-            if(modem.status == ERROR){
-                errorBuffer += "{deviceName: "+modem.deviceName+","+modem.errorBuffer+"},";
+        sensor.updateSample();
+        int numberOfreadings = sensor.numberOfreadings;
+        for (int i = 0; i < numberOfreadings; i++){
+            if(sensor.sampleStatus[i]== ERROR){
+                if(errorBuffer.length() > 0){errorBuffer += ",";}
+                errorBuffer += "{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}";
+            }else{
+                if(sensorsData.length() > 0){errorBuffer += ",";}
+                errorBuffer += "{sensorName:"+sensor.sensorName[i]+",'value':"+sensor.samplesBuffer[i]+",'unit':"+sensor.unit[i]+"}";
             }
         }
+    }
+
+    template <typename modemType>
+    int postData(modemType Modem){
+        Serial.println("postData");
+        Modem.enableModem();
+        Modem.establishConnection();
+        Modem.getTime();
+        generatePayload(Modem.dateTime);
+
+        if (Modem.status == ERROR){
+            errorBuffer += "{deviceName: "+Modem.deviceName+","+Modem.errorBuffer+"},";
+            payloadPosted = false;
+        }else{
+            Modem.postData(payload);
+            if(Modem.status == ERROR){
+                payloadPosted = true;
+                errorBuffer += "{sensorName: "+Modem.deviceName+","+Modem.errorBuffer+"},";
+            }
+        }
+        Modem.disableModem();
+        return 0;
     }
 
     /**
@@ -154,6 +164,15 @@ class surfSideScience{
         payload += "'sensors':";
         payload += sensorsData;
         payload += "}";
+    }
+
+    template <typename loggerType>
+    int log(loggerType logger){
+        if(logger.status == -1){return -1;}
+        if(!payloadPosted){logger.writeTemp(payload);}
+        logger.writeData(payload);
+        if(errorBuffer.length() > 0){logger.writeLog(errorBuffer);}
+        return 1;
     }
 };
 
