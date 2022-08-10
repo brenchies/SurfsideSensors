@@ -69,10 +69,15 @@ class surfSideScience{
      */
     template<typename... sensorType>
     void processSensors(sensorType... sensors...){
+        Serial.println("enabling sensors");
         (enableSensor(sensors), ...);
+        Serial.println("delaying: "+String(sensorStabilizeDelay));
         delay(sensorStabilizeDelay);
+        Serial.println("sampling sensors");
         (sampleSensor(sensors), ...);
+        Serial.println("disabling sensors");
         (stopSensor(sensors), ...);
+        Serial.println("errors: "+String(errorBuffer));
         Serial.println("samples: "+String(sensorsData));
     }
 
