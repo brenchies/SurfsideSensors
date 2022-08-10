@@ -1,16 +1,16 @@
-#ifndef EZO_RTD_I2C_H
-#define EZO_RTD_I2C_H
+#ifndef EZO_EC_I2C_H
+#define EZO_EC_I2C_H
 #endif
 #include <Ezo_i2c.h>
 
-#ifndef EZO_RTD_I2C_ADDRESS
-    #define EZO_RTD_I2C_ADDRESS 0x66
+#ifndef EZO_EC_I2C_ADDRESS
+    #define EZO_EC_I2C_ADDRESS 0x64
 #endif
 
 
-Ezo_board SENSOR_OBJECT = Ezo_board(EZO_RTD_I2C_ADDRESS, "RTD");
+Ezo_board EC_SENSOR_OBJECT = Ezo_board(EZO_EC_I2C_ADDRESS, "EC");
 
-class ezo_rtd_i2c{
+class ezo_ec_i2c{
     public:
     /**
      * @brief number of indicidual sensor values
@@ -34,13 +34,13 @@ class ezo_rtd_i2c{
      * @brief units of each sensor
      * 
      */
-    String units[numberOfreadings];
+    String units[numberOfreadings] = {"°C"};
 
     /**
      * @brief delay to wait for sensor to stabilize
      * 
      */
-    unsigned long sensorStabilizeDelay[numberOfreadings] = {5000};
+    unsigned long sensorStabilizeDelay = 5000;
 
     /**
      * @brief error roport from specific sensor reading
@@ -55,10 +55,10 @@ class ezo_rtd_i2c{
     int status;
 
     /**
-     * @brief status of each sample/sensor
+     * @brief status of each sample
      * 
      */
-    int sensorStatus[numberOfreadings];
+    int sampleStatus[numberOfreadings];
 
     /**
      * @brief delay to wait for each sample
@@ -110,7 +110,7 @@ class ezo_rtd_i2c{
      * @param sensorName 
      * @param unit 
      */
-    void begin(int enablePin=13, float oversamples=5, String sensorName="TEMPERATURE", String unit="°C"){
+    void begin(int enablePin=13, float oversamples=5, String sensorName="CONDUCTIVITY", String unit="μS/cm"){
         ENABLEPIN = enablePin;
         averagingSamples = oversamples;
         units[0] = unit;
@@ -151,11 +151,11 @@ class ezo_rtd_i2c{
      * @return float 
      */
     float readSensor(long delay_){
-        SENSOR_OBJECT.send_read_cmd();
+        EC_SENSOR_OBJECT.send_read_cmd();
         delay(delay_);
-        SENSOR_OBJECT.receive_read_cmd(); 
-        float val = SENSOR_OBJECT.get_last_received_reading();
-        status = SENSOR_OBJECT.get_error() == SENSOR_OBJECT.SUCCESS? 1: -1;
+        EC_SENSOR_OBJECT.receive_read_cmd(); 
+        float val = EC_SENSOR_OBJECT.get_last_received_reading();
+        status = EC_SENSOR_OBJECT.get_error() == EC_SENSOR_OBJECT.SUCCESS? 1: -1;
         return val;
     }
 
@@ -193,7 +193,6 @@ class ezo_rtd_i2c{
             }
         }
         samplesBuffer[0] = String(value, 3);
-        sensorStatus[0] = status;
         return status;
     }
 
@@ -203,13 +202,13 @@ class ezo_rtd_i2c{
      * @param trials 
      * @return int 
      */
-    int enableSensors(int trials=3)
+    int enableSensor(int trials=3)
     {
         for(int i=0; i<trials;i++)
         {
             digitalWrite(ENABLEPIN, SENSOR_ENABLE_STATE);
             delay(sensorPwrDelay);
-            readSensor(sampleReadDelay);
+            readSensor(100);
             if(status == 1){
                 break;
             }
@@ -217,9 +216,8 @@ class ezo_rtd_i2c{
 
         if (status != 1){
             processErrorBuffer(0, "enable failed");
-            disableSensors();
+            disableSensor();
         }
-        sensorStatus[0] = status;
         return status;
     }
 
@@ -229,12 +227,12 @@ class ezo_rtd_i2c{
      * @param trials 
      * @return int 
      */
-    int disableSensors(int trials=3){
+    int disableSensor(int trials=3){
         for(int i=0; i<trials;i++)
         {
             digitalWrite(ENABLEPIN, !SENSOR_ENABLE_STATE);
             delay(sensorPwrDelay);
-            readSensor(sampleReadDelay);
+            readSensor(100);
             if(status == -1){
                 break;
             }
@@ -242,11 +240,7 @@ class ezo_rtd_i2c{
 
         if (status != -1){
             processErrorBuffer(0, "disable failed");
-        }else{
-            status = 1;
         }
-        
-        sensorStatus[0] = status;
         return status;
     }
 
@@ -257,6 +251,5 @@ class ezo_rtd_i2c{
      */
     void calibrate(int LedPin=0){
 
-        sensorStatus[0] = status;
     }
 };

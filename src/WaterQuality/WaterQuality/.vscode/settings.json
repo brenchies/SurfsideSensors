@@ -15,6 +15,9 @@
         "*.tpp": "cpp",
         "cmath": "cpp",
         "ezo_i2c.h": "c",
-        "arduino.h": "c"
+        "arduino.h": "c",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "wire.h": "c"
     }
 }
