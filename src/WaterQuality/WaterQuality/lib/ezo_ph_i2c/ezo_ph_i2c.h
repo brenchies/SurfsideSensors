@@ -1,17 +1,17 @@
-#ifndef EZO_RTD_I2C_H
-#define EZO_RTD_I2C_H
+#ifndef EZO_PH_I2C_H
+#define EZO_PH_I2C_H
 #endif
 #include <Ezo_i2c.h>
 
-#define EZO_RTD_I2C_ADDRESS 0x66
-Ezo_board EZO_RTD = Ezo_board(EZO_RTD_I2C_ADDRESS, "RTD");
+#define EZO_PH_I2C_ADDRESS 0x63
+Ezo_board EZO_PH = Ezo_board(EZO_PH_I2C_ADDRESS, "PH");
 
-class ezo_rtd_i2c{
+class ezo_ph_i2c{
     public:
     int numberOfreadings = 1;
     String sensorName[1];
     String samplesBuffer[1];
-    String unit[1] = {"°C"};
+    String unit[1] = {"NAN"};
     unsigned long sensorStabilizeDelay = 3000;
     String errorBuffer[1];
     int status;
@@ -25,7 +25,7 @@ class ezo_rtd_i2c{
     int ENABLEPIN = 0;
     float averagingSamples = 1;
 
-    void begin(int enablePin=13, uint8_t address=0x66, float oversamples=10, String sensorName="TEMPERATURE"){
+    void begin(int enablePin=13, uint8_t address=0x66, float oversamples=10, String sensorName="PH"){
         ENABLEPIN = enablePin;
         averagingSamples = oversamples;
         this->sensorName[0] = sensorName;
@@ -34,14 +34,14 @@ class ezo_rtd_i2c{
             digitalWrite(enablePin, HIGH);
         }
 
-        Serial.print(EZO_RTD.get_name()); Serial.print(": "+String(enablePin)); // print the name of the circuit getting the reading
+        Serial.print(EZO_PH.get_name()); Serial.print(": "+String(enablePin)); // print the name of the circuit getting the reading
         pinMode(13, OUTPUT);
         digitalWrite(13, HIGH);
         // while(1){
-        //     EZO_RTD.send_read_cmd();
+        //     EZO_PH.send_read_cmd();
         //     delay(sampleReadDelay);
-        //     EZO_RTD.receive_read_cmd(); 
-        //     Serial.println(String(EZO_RTD.get_last_received_reading(), 2).c_str());
+        //     EZO_PH.receive_read_cmd(); 
+        //     Serial.println(String(EZO_PH.get_last_received_reading(), 2).c_str());
         // }
         
     }
@@ -49,12 +49,12 @@ class ezo_rtd_i2c{
     float readSensor(){
         
 
-        EZO_RTD.send_read_cmd();
+        EZO_PH.send_read_cmd();
         delay(sampleReadDelay);
-        EZO_RTD.receive_read_cmd(); 
-        float val = EZO_RTD.get_last_received_reading();
-        status = EZO_RTD.get_error() == 0? 1: -1;
-        Serial.println("reading sensor: "+String(val, 3)+ " error: "+String(EZO_RTD.get_error()));
+        EZO_PH.receive_read_cmd(); 
+        float val = EZO_PH.get_last_received_reading();
+        status = EZO_PH.get_error() == 0? 1: -1;
+        Serial.println("reading sensor: "+String(val, 3)+ " error: "+String(EZO_PH.get_error()));
         return val;
     }
 

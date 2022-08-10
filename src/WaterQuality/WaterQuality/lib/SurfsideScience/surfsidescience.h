@@ -15,7 +15,7 @@ class surfSideScience{
      * @brief 
      * 
      */
-    String deviceName="";
+    String deviceName="WATER_QUALITY_01";
 
     /**
      * @brief error strings {err, }
@@ -35,8 +35,7 @@ class surfSideScience{
      *                  'sensors': {sensor data}
      *                   }     * 
      */
-    String payload="{'deviceName':'WATER_QUALITY_01','timestamp':'2022-08-09 18:11:04.000-4:00','sensors':[{'sensorName':'DISSOLVED_OXYGEN','value':1.97,'unit':'mg/L'},{'sensorName':'CONDUCTIVITY','value':0.00,'unit':'μS/cm'},{'sensorName':'TEMPERATURE','value':0.00,'unit':'°C'},{'sensorName':'PH','value':0.00,'unit':'NAN'},{'sensorName':'RSSI','value':31,'unit':'NAN'},{'sensorName':'SOLAR_VIN','value':3179.96,'unit':'mV'},{'sensorName':'BATTERY_VIN','value':0.00,'unit':'mV'}]}";
-
+    String payload="";
     /**
      * @brief flag for posted data
      * 
@@ -119,8 +118,8 @@ class surfSideScience{
                 if(errorBuffer.length() > 0){errorBuffer += ",";}
                 errorBuffer += "{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}";
             }else{
-                if(sensorsData.length() > 0){errorBuffer += ",";}
-                errorBuffer += "{sensorName:"+sensor.sensorName[i]+",'value':"+sensor.samplesBuffer[i]+",'unit':"+sensor.unit[i]+"}";
+                if(sensorsData.length() > 0){sensorsData += ",";}
+                sensorsData += "{'sensorName':'"+sensor.sensorName[i]+"','value':"+sensor.samplesBuffer[i]+",'unit':'"+sensor.unit[i]+"'}";
             }
         }
     }
@@ -132,11 +131,13 @@ class surfSideScience{
         Modem.establishConnection();
         Modem.getTime();
         generatePayload(Modem.dateTime);
+        Serial.println(payload);
 
         if (Modem.status == ERROR){
             errorBuffer += "{deviceName: "+Modem.deviceName+","+Modem.errorBuffer+"},";
             payloadPosted = false;
         }else{
+            
             Modem.postData(payload);
             if(Modem.status == ERROR){
                 payloadPosted = true;
@@ -160,6 +161,7 @@ class surfSideScience{
         payload += "'sensors':";
         payload += sensorsData;
         payload += "}";
+        payload.replace("'", String('"'));
     }
 
     template <typename loggerType>
