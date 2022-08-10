@@ -41,6 +41,7 @@ class TinyGSMWrapper{
   long PIN_TX   = 27;
   long PIN_RX   = 26;
   long PIN_PWR  = 4;
+  long modemPwrdelay = 5000;
 
   // Your GPRS credentials, if any
   const char *APN   = "web.digicelaruba.com";
@@ -75,7 +76,7 @@ class TinyGSMWrapper{
   void begin(const char* apn="web.digicelaruba.com", const char* gprsuser="", const char* gprspass="",\
     const char* server="surfside-db.brenchies.com", const char* postPath="/observations", long successCode=201,\
     const char* contentType= "application/json", long uart_baud=115200, long pin_dtr=25, long pin_tx = 27,\
-    long pin_rx=26, long pin_pwr=4)
+    long pin_rx=26, long pin_pwr=4, String devicename="SIMCom SIM7000")
   {
       UART_BAUD = uart_baud;
       PIN_DTR = pin_dtr;
@@ -86,6 +87,7 @@ class TinyGSMWrapper{
       PIN_PWR = pin_pwr;
       pinMode(PIN_PWR, OUTPUT);
       digitalWrite(PIN_PWR, LOW);
+      deviceName = devicename;
       APN = apn;
       GPRSPASS = gprspass;
       GPRSUSER = gprsuser;
@@ -95,23 +97,77 @@ class TinyGSMWrapper{
   }
 
   /**
-   * @brief enable modem
+     * @brief add report to a specific error buffer
+     * 
+     * @param bufferNr 
+     * @param cause 
+     */
+    void processErrorBuffer(String cause){
+        if(errorBuffer.length() > 0){errorBuffer += ",";}
+        errorBuffer += "{'error':'"+deviceName+" "+cause+"'}";
+    }
+
+  /**
+   * @brief check for enable/disable response by trying multiple times
+   * 
+   * @param response 
+   * @param trials 
+   * @return int 
+   */
+  int isModemAlive(bool response=1, int trials=5){
+    int success_count = 0;
+    for (int i = 0; i < trials; i++){
+      modem.sendAT("+CPIN?");
+      String receive = SerialAT.readString();
+      if(response && receive.length() > 0 ||  !response && receive.length() == 0){ 
+        success_count++;
+      }else{
+        success_count = 0;
+      }
+    }
+    if(success_count != 0){
+      return 1;
+    }
+    return -1;
+  }
+
+  void sendPwrPulse(int delay_=1000, bool enable=true){
+    if(enable){
+      digitalWrite(PIN_PWR, LOW);
+      delay(delay_);
+      digitalWrite(PIN_PWR, HIGH);
+      delay(delay_);    //Datasheet Ton mintues = 1.2S
+    }
+    
+    digitalWrite(PIN_PWR, LOW);
+    delay(delay_);    //Datasheet Ton mintues = 1.2S
+    digitalWrite(PIN_PWR, HIGH);
+    if(!enable){
+      delay(delay_);    //Datasheet Ton mintues = 1.2S
+      digitalWrite(PIN_PWR, LOW);
+    }
+    delay(modemPwrdelay);
+  }
+
+  /**
+   * @brief enable modem check if alive by
    * 
    * @param trials 
    */
-  void enableModem(int trials=2){
+  int enableModem(int trials=5){
     for(int i = 0; i < trials; i++){
-      pinMode(PIN_PWR, OUTPUT);
-      digitalWrite(PIN_PWR, HIGH);
-      delay(1500);    //Datasheet Ton mintues = 1.2S
-      digitalWrite(PIN_PWR, LOW);
-      delay(1500);    //Datasheet Ton mintues = 1.2S
-      digitalWrite(PIN_PWR, HIGH);
-      delay(5000);
-
-      Serial.println("modem ON status: ");
-      //test for connectivity AT response
+      Serial.println("enabling modem");
+      sendPwrPulse(200, true);
+      status = isModemAlive(1);
+      if(status == 1){
+        Serial.println("enabling success");
+        break;
+      }
     }
+    if (status == -1){
+      processErrorBuffer("enable failed trials: "+String(trials));
+    }
+    return status;
   }
 
   /**
@@ -119,18 +175,23 @@ class TinyGSMWrapper{
    * 
    * @param trials 
    */
-  void disableModem(int trials=3){
+  int disableModem(int trials=5){
     for(int i = 0; i < trials; i++){
-      pinMode(PIN_PWR, OUTPUT);
-      digitalWrite(PIN_PWR, LOW);
-      delay(1500);    //Datasheet Ton mintues = 1.2S
-      digitalWrite(PIN_PWR, HIGH);
-      delay(1500);    //Datasheet Ton mintues = 1.2S
-      digitalWrite(PIN_PWR, LOW);
-      // test for AT connectivity
-      Serial.println("disable modem");
+      Serial.println("disabling modem");
+      sendPwrPulse(200, false);
+
+      status = isModemAlive(0);
+      Serial.println("disabling success");
+      if(status == 1){
+        break;
+      }
     }
+    if (status == -1){
+      processErrorBuffer("disable failed trials: "+String(trials));
+    }
+    return status;
   }
+
 
   /**
    * @brief Get the Time object
