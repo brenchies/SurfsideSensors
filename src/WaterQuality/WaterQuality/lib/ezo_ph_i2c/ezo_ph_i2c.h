@@ -4,11 +4,11 @@
 #include <Ezo_i2c.h>
 
 #ifndef EZO_PH_I2C_ADDRESS
-    #define EZO_PH_I2C_ADDRESS 0x64
+    #define EZO_PH_I2C_ADDRESS 0x63
 #endif
 
 
-Ezo_board PH_SENSOR_OBJECT = Ezo_board(EZO_PH_I2C_ADDRESS, "PH");
+Ezo_board EZO_PH_SENSOR_OBJECT = Ezo_board(EZO_PH_I2C_ADDRESS, "PH");
 
 class ezo_ph_i2c{
     public:
@@ -34,13 +34,13 @@ class ezo_ph_i2c{
      * @brief units of each sensor
      * 
      */
-    String units[numberOfreadings] = {"°C"};
+    String units[numberOfreadings];
 
     /**
      * @brief delay to wait for sensor to stabilize
      * 
      */
-    unsigned long sensorStabilizeDelay = 5000;
+    unsigned long sensorStabilizeDelay[numberOfreadings] = {5000};
 
     /**
      * @brief error roport from specific sensor reading
@@ -55,10 +55,10 @@ class ezo_ph_i2c{
     int status;
 
     /**
-     * @brief status of each sample
+     * @brief status of each sample/sensor
      * 
      */
-    int sampleStatus[numberOfreadings];
+    int sensorStatus[numberOfreadings];
 
     /**
      * @brief delay to wait for each sample
@@ -151,11 +151,11 @@ class ezo_ph_i2c{
      * @return float 
      */
     float readSensor(long delay_){
-        PH_SENSOR_OBJECT.send_read_cmd();
+        EZO_PH_SENSOR_OBJECT.send_read_cmd();
         delay(delay_);
-        PH_SENSOR_OBJECT.receive_read_cmd(); 
-        float val = PH_SENSOR_OBJECT.get_last_received_reading();
-        status = PH_SENSOR_OBJECT.get_error() == PH_SENSOR_OBJECT.SUCCESS? 1: -1;
+        EZO_PH_SENSOR_OBJECT.receive_read_cmd(); 
+        float val = EZO_PH_SENSOR_OBJECT.get_last_received_reading();
+        status = EZO_PH_SENSOR_OBJECT.get_error() == EZO_PH_SENSOR_OBJECT.SUCCESS? 1: -1;
         return val;
     }
 
@@ -193,6 +193,7 @@ class ezo_ph_i2c{
             }
         }
         samplesBuffer[0] = String(value, 3);
+        sensorStatus[0] = status;
         return status;
     }
 
@@ -202,13 +203,13 @@ class ezo_ph_i2c{
      * @param trials 
      * @return int 
      */
-    int enableSensor(int trials=3)
+    int enableSensors(int trials=3)
     {
         for(int i=0; i<trials;i++)
         {
             digitalWrite(ENABLEPIN, SENSOR_ENABLE_STATE);
             delay(sensorPwrDelay);
-            readSensor(100);
+            readSensor(sampleReadDelay);
             if(status == 1){
                 break;
             }
@@ -216,8 +217,9 @@ class ezo_ph_i2c{
 
         if (status != 1){
             processErrorBuffer(0, "enable failed");
-            disableSensor();
+            disableSensors();
         }
+        sensorStatus[0] = status;
         return status;
     }
 
@@ -227,12 +229,12 @@ class ezo_ph_i2c{
      * @param trials 
      * @return int 
      */
-    int disableSensor(int trials=3){
+    int disableSensors(int trials=3){
         for(int i=0; i<trials;i++)
         {
             digitalWrite(ENABLEPIN, !SENSOR_ENABLE_STATE);
             delay(sensorPwrDelay);
-            readSensor(100);
+            readSensor(sampleReadDelay);
             if(status == -1){
                 break;
             }
@@ -240,7 +242,11 @@ class ezo_ph_i2c{
 
         if (status != -1){
             processErrorBuffer(0, "disable failed");
+        }else{
+            status = 1;
         }
+        
+        sensorStatus[0] = status;
         return status;
     }
 
@@ -251,5 +257,6 @@ class ezo_ph_i2c{
      */
     void calibrate(int LedPin=0){
 
+        sensorStatus[0] = status;
     }
 };
