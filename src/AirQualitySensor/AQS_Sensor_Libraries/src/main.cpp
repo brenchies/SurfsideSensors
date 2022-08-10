@@ -7,39 +7,26 @@
 #include <Arduino.h>
 #include "Wire.h"
 #include "SHT31.h"
+#include "SHT31_SSS.h"
 
-#define SHT31_ADDRESS   0x44
+#define SHT31_ADDRESS 0x44
 
-uint32_t start;
-uint32_t stop;
-
-SHT31 sht;
-
+SHT31_SSS sht31(5);
 
 void setup()
 {
   Serial.begin(115200);
   Wire.begin();
-  sht.begin(SHT31_ADDRESS);
-
+  sht31.begin();
 }
-
 
 void loop()
 {
-  if ( sht.isConnected()  )
-  {
-    sht.read();         // default = true/fast       slow = false
-
-    Serial.println(sht.getTemperature());
-    Serial.println(sht.getHumidity());
-  }
-  else
-  {
-    Serial.println("\tNot connected:\t");
-    // sht.reset();
-  }
-  delay(1000);
+  String data;
+  sht31.enableSensors();
+  data = sht31.getSensorSamples();
+  Serial.println(data);
+  delay(2000);
 }
 
 
