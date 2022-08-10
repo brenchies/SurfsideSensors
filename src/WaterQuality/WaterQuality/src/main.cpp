@@ -25,12 +25,16 @@ void setup() {
   mysim.begin();
   mylogger.begin();
   myRTD.begin();
-  myDO.begin();
-  myPH.begin();
-  myEC.begin();
-  myscience.processSensors(myRTD, myDO, myPH, myEC);
+  // myDO.begin();
+  // myPH.begin();
+  // myEC.begin();
+  
+  // myscience.processSensors(myRTD, myDO, myPH, myEC);
+   myscience.processSensors(myRTD);
+  Serial.println(myRTD.samplesBuffer[0]);
+  Serial.println(myRTD.errorBuffer[0]);
   myscience.postData(mysim);
-  myscience.log(mylogger);
+  // myscience.log(mylogger);
 }
 
 

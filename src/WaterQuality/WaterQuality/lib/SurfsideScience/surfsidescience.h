@@ -73,6 +73,7 @@ class surfSideScience{
         delay(sensorStabilizeDelay);
         (sampleSensor(sensors), ...);
         (stopSensor(sensors), ...);
+        Serial.println("samples: "+String(sensorsData));
     }
 
     /**
@@ -83,11 +84,21 @@ class surfSideScience{
      */
     template <typename sensorType>
     void enableSensor(sensorType sensor){
-        sensor.enableSensor();
-        if (sensor.sensorStabilizeDelay > sensorStabilizeDelay)
+        sensor.enableSensors();
+        int numberOfreadings = sensor.numberOfreadings;
+        for(int i=0; i < numberOfreadings; i++)
+        {
+            if (sensor.status != SUCCESS)
             {
-            sensorStabilizeDelay = sensor.sensorStabilizeDelay;
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                sensor.errorBuffer[i] = "";
             }
+
+            if (sensor.sensorStabilizeDelay[i] > sensorStabilizeDelay)
+            {
+            sensorStabilizeDelay = sensor.sensorStabilizeDelay[i];
+            }
+        }
 
     }
 
@@ -99,7 +110,26 @@ class surfSideScience{
      */
     template <typename sensorType>
     void stopSensor(sensorType sensor){
-        sensor.disableSensor();
+        sensor.disableSensors();
+        int numberOfreadings = sensor.numberOfreadings;
+        for(int i=0; i < numberOfreadings; i++)
+        {
+            if (sensor.sensorStatus[i] != SUCCESS)
+            {
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                sensor.errorBuffer[i] = "";
+            }
+        }
+    }
+
+    /**
+     * @brief append error to buffer
+     * 
+     * @param cause 
+     */
+    void processErrorBuffer(String cause){
+        if(errorBuffer.length() > 0){errorBuffer += ",";}
+        errorBuffer += cause;
     }
 
     /**
@@ -114,12 +144,12 @@ class surfSideScience{
         sensor.getSamples();
         int numberOfreadings = sensor.numberOfreadings;
         for (int i = 0; i < numberOfreadings; i++){
-            if(sensor.sampleStatus[i]== ERROR){
-                if(errorBuffer.length() > 0){errorBuffer += ",";}
-                errorBuffer += "{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}";
+            if(sensor.sensorStatus[i] != SUCCESS){
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                sensor.errorBuffer[i] = "";
             }else{
                 if(sensorsData.length() > 0){sensorsData += ",";}
-                sensorsData += "{'sensorName':'"+sensor.sensorName[i]+"','value':"+sensor.samplesBuffer[i]+",'unit':'"+sensor.unit[i]+"'}";
+                sensorsData += "{'sensorName':'"+sensor.sensorName[i]+"','value':"+sensor.samplesBuffer[i]+",'unit':'"+sensor.units[i]+"'}";
             }
         }
     }
@@ -158,9 +188,9 @@ class surfSideScience{
         payload = "{";
         payload += "'deviceName':'"+String(deviceName)+"',";
         payload += "'timestamp':'"+dateTime+"',";
-        payload += "'sensors':";
+        payload += "'sensors':[";
         payload += sensorsData;
-        payload += "}";
+        payload += "]}";
         payload.replace("'", String('"'));
     }
 
