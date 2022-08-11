@@ -4,9 +4,13 @@
 #define TYPE_MEASUREMENTS 2  //Temperature, Humidity
 #define TEMPERRATURE 0
 #define HUMIDITY 1
+#define TEMP_MIN -25
+#define TEMP_MAX 100
+#define HUM_MIN 0
+#define HUM_MAX 100
 #include "SHT31.h"
 
-struct Measurement
+struct SensorData
 {
     String name;
     String unit;
@@ -18,10 +22,11 @@ struct SampleMeasurement
     float value[TYPE_MEASUREMENTS];
 };
 
-enum ERROR
+enum STATUS_CODES
 {
+    SUCCESS = 1,
     ERROR_CONNECTION = -1,
-    ERROR_VALUE_RANGE = -2,
+    ERROR_VALUE_OUT_OF_RANGE = -2
 };
 
 class SHT31_SSS 
@@ -29,11 +34,9 @@ class SHT31_SSS
 private:
 SHT31 *_sht31;
 float *_sensorSamples[TYPE_MEASUREMENTS];
-int _errorStatus;
 int _numberOfMeasurements;
 int _total_oversamples;
-Measurement _measurements[TYPE_MEASUREMENTS];
-SampleMeasurement _sensorSamples;
+SensorData *_sensorData[TYPE_MEASUREMENTS]; //measurements
 
 
 public:
@@ -42,6 +45,7 @@ public:
     void enableSensors();
     bool valueInRange(float, float, float);
     struct SampleMeasurement getSensorSamples();
+    int getAvgSensorReadings();
 };
 
 #endif

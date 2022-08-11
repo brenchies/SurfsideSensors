@@ -23,11 +23,38 @@ void setup()
 void loop()
 {
   String data;
-  sht31.enableSensors();
-  data = sht31.getSensorSamples();
+  switch (sht31.getAvgSensorReadings())
+  {
+  case SUCCESS:
+    Serial.println()
+    break;
+  
+  default err:
+    break;
+  }
   Serial.println(data);
   delay(2000);
 }
+
+String databasePayload(String name, String unit, String val)
+{
+ for(int i = 0; i)
+}
+
+void sampleSensor(sensorType sensor){
+        float *data;
+        sensor.getSamples();
+        int numberOfreadings = sensor.numberOfreadings;
+        for (int i = 0; i < numberOfreadings; i++){
+            if(sensor.sensorStatus[i] != SUCCESS){
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                sensor.errorBuffer[i] = "";
+            }else{
+                if(sensorsData.length() > 0){sensorsData += ",";}
+                sensorsData += "{'sensorName':'"+sensor.sensorName[i]+"','value':"+sensor.samplesBuffer[i]+",'unit':'"+sensor.units[i]+"'}";
+            }
+        }
+    }
 
 
 // -- END OF FILE --
