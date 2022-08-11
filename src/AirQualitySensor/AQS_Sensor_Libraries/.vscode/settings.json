@@ -12,6 +12,7 @@
         "utility": "cpp",
         "algorithm": "cpp",
         "*.tcc": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "typeinfo": "cpp"
     }
 }

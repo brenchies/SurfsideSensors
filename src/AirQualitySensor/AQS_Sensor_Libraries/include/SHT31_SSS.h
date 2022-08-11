@@ -10,11 +10,19 @@
 #define HUM_MAX 100
 #include "SHT31.h"
 
-struct SensorData
+
+
+struct Data
 {
     String name;
     String unit;
     String value;
+    String status;
+};
+
+struct Sensors 
+{
+    Data data[TYPE_MEASUREMENTS];
 };
 
 struct SampleMeasurement
@@ -22,12 +30,14 @@ struct SampleMeasurement
     float value[TYPE_MEASUREMENTS];
 };
 
+
 enum STATUS_CODES
 {
-    SUCCESS = 1,
-    ERROR_CONNECTION = -1,
-    ERROR_VALUE_OUT_OF_RANGE = -2
+    SUCCESS_CONNECTED = 0,
+    ERROR_CONNECTION = 1,
+    ERROR_VALUE_OUT_OF_RANGE = 2
 };
+
 
 class SHT31_SSS 
 {
@@ -36,16 +46,19 @@ SHT31 *_sht31;
 float *_sensorSamples[TYPE_MEASUREMENTS];
 int _numberOfMeasurements;
 int _total_oversamples;
-SensorData *_sensorData[TYPE_MEASUREMENTS]; //measurements
+Sensors *_sensors; //measurements
 
 
 public:
     SHT31_SSS(int);
+    Sensors getSensors() {return *this->_sensors;}
+    int getNumberOfMeasurements() {return this->_numberOfMeasurements;}
     void begin();
     void enableSensors();
     bool valueInRange(float, float, float);
     struct SampleMeasurement getSensorSamples();
     int getAvgSensorReadings();
+    String Status_code[3] = {"SUCCESS_CONNECTED", "I2C_CONNECTION_FAILED", "VALUE_OUT_OF_RANGE"};
 };
 
 #endif
