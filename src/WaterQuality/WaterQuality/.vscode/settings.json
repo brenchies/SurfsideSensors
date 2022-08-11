@@ -18,6 +18,8 @@
         "arduino.h": "c",
         "istream": "cpp",
         "ostream": "cpp",
-        "wire.h": "c"
-    }
+        "wire.h": "c",
+        "new": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

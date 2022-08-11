@@ -89,10 +89,13 @@ class surfSideScience{
      */
     template <typename sensorType>
     void enableSensor(sensorType sensor){
+        Serial.println("enable main");
         sensor.enableSensors();
         int numberOfreadings = sensor.numberOfreadings;
+        Serial.println("enable main");
         for(int i=0; i < numberOfreadings; i++)
         {
+            Serial.println("enable main");
             if (sensor.status != SUCCESS)
             {
                 processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");

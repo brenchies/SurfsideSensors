@@ -27,19 +27,17 @@ void setup() {
   mysim.begin();
   mylogger.begin();
   myRTD.begin();
-  myRTD.enableSensors();
-  myRTD.getSamples();
-  myRTD.disableSensors();
-  Serial.println("error: "+String(myRTD.errorBuffer[0]));
-  Serial.println("sample: "+String(myRTD.samplesBuffer[0]));
   // myDO.begin();
   // myPH.begin();
   // myEC.begin();
   #define sleep_ 1000000*60*60
+  long delay_ = 1000;
+  myRTD.enableSensors();
+  delay(10000);
+  myRTD.getSamples();
+  myRTD.disableSensors();
   // myscience.processSensors<ezo_rtd_i2c, ezo_ec_i2c,ezo_ph_i2c,ezo_do_i2c>(myRTD, myEC,myPH, myDO);
-  //  myscience.processSensors(myRTD);
-  // Serial.println(myRTD.samplesBuffer[0]);
-  // Serial.println(myRTD.errorBuffer[0]);
+   myscience.processSensors(myRTD);
   // myscience.postData(mysim);
   // myscience.log(mylogger);
 
