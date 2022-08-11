@@ -43,35 +43,35 @@ String databasePayload(SHT31_SSS *sht31)
     case SUCCESS_CONNECTED: //"{'sensorName':'" + name + "','value':" + val + ",'unit':'" + unit + "'}";
       if (i < max)
       {
-        if (sht31->getSensors().data[i].status == String(ERROR_VALUE_OUT_OF_RANGE))
+        if (sht31->getSensors().data[i]->status == String(ERROR_VALUE_OUT_OF_RANGE))
         {
-          sensorData += sensorErrorProtocol(sht31->getSensors().data[i].name, sht31->getSensors().data[i].status) + ",";
+          sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status) + ",";
         }
         else
         {
-          sensorData += sensorProtocol(sht31->getSensors().data[i].name, sht31->getSensors().data[i].value, sht31->getSensors().data[i].unit) + ",";
+          sensorData += sensorProtocol(sht31->getSensors().data[i]->name, String(sht31->getSensors().data[i]->value), sht31->getSensors().data[i]->unit) + ",";
         }
       }
       else if (i == max)
       {
-        if (sht31->getSensors().data[i].status == String(ERROR_VALUE_OUT_OF_RANGE))
+        if (sht31->getSensors().data[i]->status == String(ERROR_VALUE_OUT_OF_RANGE))
         {
-          sensorData += sensorErrorProtocol(sht31->getSensors().data[i].name, sht31->getSensors().data[i].status);
+          sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status);
         }
         else
         {
-          sensorData += sensorProtocol(sht31->getSensors().data[i].name, sht31->getSensors().data[i].value, sht31->getSensors().data[i].unit);
+          sensorData += sensorProtocol(sht31->getSensors().data[i]->name, String(sht31->getSensors().data[i]->value), sht31->getSensors().data[i]->unit);
         }
       }
       break;
     case ERROR_CONNECTION:
       if (i < max)
       {
-        sensorData += sensorErrorProtocol(sht31->getSensors().data[i].name, sht31->getSensors().data[i].status) + ",";
+        sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status) + ",";
       }
       else if (i == max)
       {
-        sensorData += sensorErrorProtocol(sht31->getSensors().data[i].name, sht31->getSensors().data[i].status);
+        sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status);
       }
       break;
     }

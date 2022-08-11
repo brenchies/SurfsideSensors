@@ -16,13 +16,13 @@ struct Data
 {
     String name;
     String unit;
-    String value;
+    float value;
     String status;
 };
 
 struct Sensors 
 {
-    Data data[TYPE_MEASUREMENTS];
+    Data *data[TYPE_MEASUREMENTS];
 };
 
 struct SampleMeasurement
@@ -46,7 +46,8 @@ SHT31 *_sht31;
 float *_sensorSamples[TYPE_MEASUREMENTS];
 int _numberOfMeasurements;
 int _total_oversamples;
-Sensors *_sensors; //measurements
+ SampleMeasurement *_sample;
+Sensors *_sensors; //measurements changed to non *
 
 
 public:
@@ -56,7 +57,7 @@ public:
     void begin();
     void enableSensors();
     bool valueInRange(float, float, float);
-    struct SampleMeasurement getSensorSamples();
+    //struct SampleMeasurement getSensorSamples();
     int getAvgSensorReadings();
     String Status_code[3] = {"SUCCESS_CONNECTED", "I2C_CONNECTION_FAILED", "VALUE_OUT_OF_RANGE"};
 };
