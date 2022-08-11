@@ -4,18 +4,20 @@
 #include <tinygsmwrapper.h>
 #include <sdlogger.h>
 #include <ezo_rtd_i2c.h>
-#include <ezo_do_i2c.h>
-#include <ezo_ec_i2c.h>
-#include <ezo_ph_i2c.h>
+// #include <ezo_do_i2c.h>
+// #include <ezo_ec_i2c.h>
+// #include <ezo_ph_i2c.h>
+
+//t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
 
 
 surfSideScience myscience("WATER_QUALITY_01");
 TinyGSMWrapper mysim;
 sdlogger mylogger;
 ezo_rtd_i2c myRTD;
-ezo_ec_i2c myEC;
-ezo_ph_i2c myPH;
-ezo_do_i2c myDO;
+// ezo_ec_i2c myEC;
+// ezo_ph_i2c myPH;
+// ezo_do_i2c myDO;
 
 
 void setup() {
@@ -25,16 +27,21 @@ void setup() {
   mysim.begin();
   mylogger.begin();
   myRTD.begin();
-  myDO.begin();
-  myPH.begin();
-  myEC.begin();
+  myRTD.enableSensors();
+  myRTD.getSamples();
+  myRTD.disableSensors();
+  Serial.println("error: "+String(myRTD.errorBuffer[0]));
+  Serial.println("sample: "+String(myRTD.samplesBuffer[0]));
+  // myDO.begin();
+  // myPH.begin();
+  // myEC.begin();
   #define sleep_ 1000000*60*60
-  myscience.processSensors<ezo_rtd_i2c, ezo_ec_i2c,ezo_ph_i2c,ezo_do_i2c>(myRTD, myEC,myPH, myDO);
+  // myscience.processSensors<ezo_rtd_i2c, ezo_ec_i2c,ezo_ph_i2c,ezo_do_i2c>(myRTD, myEC,myPH, myDO);
   //  myscience.processSensors(myRTD);
   // Serial.println(myRTD.samplesBuffer[0]);
   // Serial.println(myRTD.errorBuffer[0]);
-  myscience.postData(mysim);
-  myscience.log(mylogger);
+  // myscience.postData(mysim);
+  // myscience.log(mylogger);
 
   Serial.println("going to sleep");
    

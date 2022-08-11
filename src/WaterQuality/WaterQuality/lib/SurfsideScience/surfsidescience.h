@@ -150,7 +150,7 @@ class surfSideScience{
         int numberOfreadings = sensor.numberOfreadings;
         for (int i = 0; i < numberOfreadings; i++){
             if(sensor.sensorStatus[i] != SUCCESS){
-                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                processErrorBuffer("{sensorName: '"+sensor.sensorName[i]+"', 'error': '"+sensor.errorBuffer[i]+"'}");
                 sensor.errorBuffer[i] = "";
             }else{
                 if(sensorsData.length() > 0){sensorsData += ",";}
@@ -201,6 +201,7 @@ class surfSideScience{
 
     template <typename loggerType>
     int log(loggerType logger){
+        Serial.println("logger status: "+String(logger.status));
         if(logger.status == -1){return -1;}
         if(!payloadPosted){logger.writeTemp(payload);}
         logger.writeData(payload);

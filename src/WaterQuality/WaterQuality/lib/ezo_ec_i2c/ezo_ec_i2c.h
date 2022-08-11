@@ -76,7 +76,7 @@ class ezo_ec_i2c{
      * @brief range of expected values
      * 
      */
-    float EXPECTED_VALUE_RANGE[2] = {0, 100};
+    float EXPECTED_VALUE_RANGE[2] = {0, 10000000};
 
     /**
      * @brief condition to check if value is in expected range

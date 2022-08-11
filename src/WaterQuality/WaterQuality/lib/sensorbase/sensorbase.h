@@ -1,9 +1,8 @@
-#ifndef EZO_RTD_I2C_H
-#define EZO_RTD_I2C_H
-#endif
-#include <Ezo_i2c.h>
+#ifndef SENSOR_BASE_H
+#define SENSOR_BASE_I2C_H
+#include <Arduino.h>
 
-class ezo_rtd_i2c{
+class sensorBase{
     public:
     /**
      * @brief number of individual sensor values to return
@@ -98,8 +97,6 @@ class ezo_rtd_i2c{
     int sensorReadingDecimals[numberOfreadings] = {3};
 
     float samplesTemp[numberOfreadings];
-
-    Ezo_board *SENSOR_OBJECT;
 
     /**
      * @brief begin function, sensor arguments
@@ -305,3 +302,4 @@ class ezo_rtd_i2c{
         sensorStatus[0] = status;
     }
 };
+#endif
