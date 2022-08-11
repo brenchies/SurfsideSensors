@@ -8,7 +8,7 @@
 #endif
 
 
-Ezo_board SENSOR_OBJECT = Ezo_board(EZO_RTD_I2C_ADDRESS, "RTD");
+Ezo_board EZO_RTD_SENSOR_OBJECT = Ezo_board(EZO_RTD_I2C_ADDRESS, "RTD");
 
 class ezo_rtd_i2c{
     public:
@@ -40,7 +40,7 @@ class ezo_rtd_i2c{
      * @brief delay to wait for sensor to stabilize
      * 
      */
-    unsigned long sensorStabilizeDelay[numberOfreadings] = {5000};
+    unsigned long sensorStabilizeDelay[numberOfreadings] = {30000};
 
     /**
      * @brief error roport from specific sensor reading
@@ -151,11 +151,11 @@ class ezo_rtd_i2c{
      * @return float 
      */
     float readSensor(long delay_){
-        SENSOR_OBJECT.send_read_cmd();
+        EZO_RTD_SENSOR_OBJECT.send_read_cmd();
         delay(delay_);
-        SENSOR_OBJECT.receive_read_cmd(); 
-        float val = SENSOR_OBJECT.get_last_received_reading();
-        status = SENSOR_OBJECT.get_error() == SENSOR_OBJECT.SUCCESS? 1: -1;
+        EZO_RTD_SENSOR_OBJECT.receive_read_cmd(); 
+        float val = EZO_RTD_SENSOR_OBJECT.get_last_received_reading();
+        status = EZO_RTD_SENSOR_OBJECT.get_error() == EZO_RTD_SENSOR_OBJECT.SUCCESS? 1: -1;
         return val;
     }
 
