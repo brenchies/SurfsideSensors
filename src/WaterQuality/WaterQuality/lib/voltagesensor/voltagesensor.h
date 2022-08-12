@@ -5,42 +5,53 @@
 
     class voltageSensor: public sensorBase{
         public:
-        int sensorPin;
+        int sensorPin[BASE_SENSORS_DEFAULT_NR_READINGS];
 
-        void begin(int pinNumber=36, String sensorname="SOLAR_VIN", String unit="mV", int numberOfSamples=10, long sampleRead_delay=50, float voltageSenseFactor=3300 / 4096.0 * 3300.0 / 1508.20){
+        voltageSensor(int numberOfSensors, int pinNumber[], String sensorname[], float voltageSenseFactor[], float min_[], float max_[], String unit[], int numberOfSamples=10, long sampleRead_delay=50, int decimals=3){
                 ENABLEPIN=0;
                 averagingSamples=numberOfSamples;
                 checkValueInRange=true;
-                sensorPwrDelay=0;
                 sampleReadDelay=sampleReadDelay;
                 SENSOR_ENABLE_STATE=HIGH;
-                sensorName[0] = sensorname;
-                units[0] = unit;
-                numberOfreadings = 1;
-                sensorStabilizeDelay[0] = 0;
-                sensorReadingDecimals[0] = 3;
-                EXPECTED_VALUE_RANGE[0][0] = 0;
-                EXPECTED_VALUE_RANGE[0][1] = 5000;   
-
-                sensorPin = pinNumber;
+                sensorPwrDelay=10;
+                numberOfreadings = numberOfSensors;
+                for(int i=0; i < numberOfreadings;i++){
+                    sensorName[i] = sensorname[i];
+                    units[i] = unit[i];
+                    sensorStabilizeDelay[i] = sampleRead_delay;
+                    sensorReadingDecimals[i] = decimals;
+                    EXPECTED_VALUE_MIN[i] = min_[i];
+                    EXPECTED_VALUE_MAX[i] = max_[i];  
+                    sensorPin[i] = pinNumber[i];
+                     pinMode(sensorPin[i], INPUT);
+                }               
         }
 
         int readSensorImpl(float *buffer, int *sensorstatus, long delay_){
-            float val = analogRead(sensorPin);
-            buffer[0] += val;
-            sensorStatus[0] = 1;
-            return 1;
+            for(int i=0; i < numberOfreadings; i++){
+                buffer[i] = analogRead(sensorPin[i]);
+                sensorStatus[i] = SENSOR_BASE_SUCCESS;
+            }
+            return SENSOR_BASE_SUCCESS;
         }
+
         int enableSensorsImpl(int *sensorstatus){
-            sensorstatus[0] = 1;
-            return 1;
+            for(int i=0; i < numberOfreadings; i++){
+                sensorstatus[i] = SENSOR_BASE_SUCCESS;
+            }
+            return SENSOR_BASE_SUCCESS;
         }
         int disableSensorsImpl(int *sensorstatus){
-            sensorstatus[0] = 1;
-            return 1;
+            for(int i=0; i < numberOfreadings; i++){
+                sensorstatus[i] = SENSOR_BASE_SUCCESS;
+            }
+            return SENSOR_BASE_SUCCESS;
         }
-        int calibrateSensorsImpl(int statusLed){
-
+        int calibrateSensorsImpl(int statusLed, int *sensorstatus){
+           for(int i=0; i < numberOfreadings; i++){
+                sensorstatus[i] = SENSOR_BASE_SUCCESS;
+            }
+            return SENSOR_BASE_SUCCESS;
         }
     };
 
