@@ -6,36 +6,54 @@ SHT31_SSS::SHT31_SSS(int total_oversamples)
     this->_sht31 = &sht31;
     _numberOfMeasurements = TYPE_MEASUREMENTS;
     _total_oversamples = total_oversamples;
-    
-    this->_sensors->data[TEMPERRATURE]->name = "Temperature";
-    this->_sensors->data[TEMPERRATURE]->unit = "°C";
-    this->_sensors->data[HUMIDITY]->name = "Humidity";
-    this->_sensors->data[HUMIDITY]->unit  = "%";
+
+    // this->_sensors->data[TEMPERRATURE]->name = "Temperature";
+    // this->_sensors->data[TEMPERRATURE]->unit = "°C";
+    // this->_sensors->data[HUMIDITY]->name = "Humidity";
+    // this->_sensors->data[HUMIDITY]->unit = "%";
 }
 
 void SHT31_SSS::begin()
 {
     this->_sht31->begin(SHT_DEFAULT_ADDRESS);
 }
-void SHT31_SSS::enableSensors()
-{
-    this->_sht31->read(); // default = true/fast       slow = false
-}
-
-bool SHT31_SSS::valueInRange(float val, float min, float max)
-{
-    return ((val - min) <= (max - min)); // true, else false
-}
-
-// struct SampleMeasurement SHT31_SSS::getSensorSamples()
+// void SHT31_SSS::enableSensors()
 // {
-//     // struct SampleMeasurement sample;
-//     // sample.value[TEMPERRATURE] = this->_sht31->getTemperature();
-//     // sample.value[HUMIDITY] = this->_sht31->getHumidity();
-//     // // value +="{'sensorName':'"+this->_measurements[TEMPERRATURE].name+"','value':"+this->_measurements[TEMPERRATURE].value+",'unit':'"+this->_measurements[TEMPERRATURE].unit+"'},"
-//     // //          +"{'sensorName':'"+this->_measurements[HUMIDITY].name+"','value':"+this->_measurements[HUMIDITY].value+",'unit':'"+this->_measurements[HUMIDITY].unit+"'}";
-//     // return sample;
+//     this->_sht31->read(); // default = true/fast       slow = false
 // }
+
+// bool SHT31_SSS::valueInRange(float val, float min, float max)
+// {
+//     return ((val - min) <= (max - min)); // true, else false
+// }
+
+void SHT31_SSS ::getValue()
+{
+    String data;
+    if (this->_sht31->isConnected())
+    {
+        this->_sht31->read(); // default = true/fast       slow = false
+
+        data = "Temp:" + String(this->_sht31->getTemperature());
+        data += "\nHum:" + String(this->_sht31->getHumidity());
+    }
+    else
+    {
+        data = "\nNot connected";
+    }
+    
+    this->_data = &data;
+}
+
+struct SampleMeasurement SHT31_SSS::getSensorSamples()
+{
+    // struct SampleMeasurement sample;
+    // sample.value[TEMPERRATURE] = this->_sht31->getTemperature();
+    // sample.value[HUMIDITY] = this->_sht31->getHumidity();
+    // // value +="{'sensorName':'"+this->_measurements[TEMPERRATURE].name+"','value':"+this->_measurements[TEMPERRATURE].value+",'unit':'"+this->_measurements[TEMPERRATURE].unit+"'},"
+    // //          +"{'sensorName':'"+this->_measurements[HUMIDITY].name+"','value':"+this->_measurements[HUMIDITY].value+",'unit':'"+this->_measurements[HUMIDITY].unit+"'}";
+    // return sample;
+}
 
 int SHT31_SSS::getAvgSensorReadings()
 {

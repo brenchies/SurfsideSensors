@@ -12,9 +12,9 @@
 #define SHT31_ADDRESS 0x44
 
 SHT31_SSS sht31(5);
-String databasePayload(SHT31_SSS *sht31);
-String sensorErrorProtocol(String name, String errorType);
-String sensorProtocol(String name, String value, String unit);
+// String databasePayload(SHT31_SSS *sht31);
+// String sensorErrorProtocol(String name, String errorType);
+// String sensorProtocol(String name, String value, String unit);
 
 void setup()
 {
@@ -25,74 +25,75 @@ void setup()
 
 void loop()
 {
-  String data = databasePayload(&sht31);
+ sht31.getValue();
  
-  Serial.println(data);
+  Serial.println(sht31.getData());
   delay(2000);
 }
 
-String databasePayload(SHT31_SSS *sht31)
-{
-  int max = sht31->getNumberOfMeasurements();
-  String sensorData = ",";
 
-  for (int i = 0; i > max; i++)
-  {
-    switch (sht31->getAvgSensorReadings())
-    {
-    case SUCCESS_CONNECTED: //"{'sensorName':'" + name + "','value':" + val + ",'unit':'" + unit + "'}";
-      if (i < max)
-      {
-        if (sht31->getSensors().data[i]->status == String(ERROR_VALUE_OUT_OF_RANGE))
-        {
-          sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status) + ",";
-        }
-        else
-        {
-          sensorData += sensorProtocol(sht31->getSensors().data[i]->name, String(sht31->getSensors().data[i]->value), sht31->getSensors().data[i]->unit) + ",";
-        }
-      }
-      else if (i == max)
-      {
-        if (sht31->getSensors().data[i]->status == String(ERROR_VALUE_OUT_OF_RANGE))
-        {
-          sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status);
-        }
-        else
-        {
-          sensorData += sensorProtocol(sht31->getSensors().data[i]->name, String(sht31->getSensors().data[i]->value), sht31->getSensors().data[i]->unit);
-        }
-      }
-      break;
-    case ERROR_CONNECTION:
-      if (i < max)
-      {
-        sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status) + ",";
-      }
-      else if (i == max)
-      {
-        sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status);
-      }
-      break;
-    }
-  }
+// String databasePayload(SHT31_SSS *sht31)
+// {
+//   int max = sht31->getNumberOfMeasurements();
+//   String sensorData = ",";
 
-  return sensorData;
-}
+//   for (int i = 0; i > max; i++)
+//   {
+//     switch (sht31->getAvgSensorReadings())
+//     {
+//     case SUCCESS_CONNECTED: //"{'sensorName':'" + name + "','value':" + val + ",'unit':'" + unit + "'}";
+//       if (i < max)
+//       {
+//         if (sht31->getSensors().data[i]->status == String(ERROR_VALUE_OUT_OF_RANGE))
+//         {
+//           sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status) + ",";
+//         }
+//         else
+//         {
+//           sensorData += sensorProtocol(sht31->getSensors().data[i]->name, String(sht31->getSensors().data[i]->value), sht31->getSensors().data[i]->unit) + ",";
+//         }
+//       }
+//       else if (i == max)
+//       {
+//         if (sht31->getSensors().data[i]->status == String(ERROR_VALUE_OUT_OF_RANGE))
+//         {
+//           sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status);
+//         }
+//         else
+//         {
+//           sensorData += sensorProtocol(sht31->getSensors().data[i]->name, String(sht31->getSensors().data[i]->value), sht31->getSensors().data[i]->unit);
+//         }
+//       }
+//       break;
+//     case ERROR_CONNECTION:
+//       if (i < max)
+//       {
+//         sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status) + ",";
+//       }
+//       else if (i == max)
+//       {
+//         sensorData += sensorErrorProtocol(sht31->getSensors().data[i]->name, sht31->getSensors().data[i]->status);
+//       }
+//       break;
+//     }
+//   }
 
-String sensorProtocol(String name, String value, String unit)
-{
-  return "{'sensorName':'" + name + "'," +
-         "  'value':" + value + "," +
-         "  'unit':'" + unit + "'" +
-         "}";
-}
+//   return sensorData;
+// }
 
-String sensorErrorProtocol(String name, String errorType)
-{
-  return "{'sensorName':'" + name + "'," +
-         "  'error':" + errorType + "," +
-         "}";
-}
+// String sensorProtocol(String name, String value, String unit)
+// {
+//   return "{'sensorName':'" + name + "'," +
+//          "  'value':" + value + "," +
+//          "  'unit':'" + unit + "'" +
+//          "}";
+// }
 
-// -- END OF FILE --
+// String sensorErrorProtocol(String name, String errorType)
+// {
+//   return "{'sensorName':'" + name + "'," +
+//          "  'error':" + errorType + "," +
+//          "}";
+// }
+
+// // -- END OF FILE --

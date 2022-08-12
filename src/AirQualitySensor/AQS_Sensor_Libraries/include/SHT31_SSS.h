@@ -22,7 +22,7 @@ struct Data
 
 struct Sensors 
 {
-    Data *data[TYPE_MEASUREMENTS];
+    Data data[TYPE_MEASUREMENTS];
 };
 
 struct SampleMeasurement
@@ -49,16 +49,22 @@ int _total_oversamples;
  SampleMeasurement *_sample;
 Sensors *_sensors; //measurements changed to non *
 
+String *_data;
+
 
 public:
+    
     SHT31_SSS(int);
+    String getData() {return *this->_data;}
+    ///SHT31 getSHT(){return *this->_sht31;}
+    void getValue();
     Sensors getSensors() {return *this->_sensors;}
-    int getNumberOfMeasurements() {return this->_numberOfMeasurements;}
+    //int getNumberOfMeasurements() {return this->_numberOfMeasurements;}
     void begin();
-    void enableSensors();
+    //void enableSensors();
     bool valueInRange(float, float, float);
     //struct SampleMeasurement getSensorSamples();
-    int getAvgSensorReadings();
+    //int getAvgSensorReadings();
     String Status_code[3] = {"SUCCESS_CONNECTED", "I2C_CONNECTION_FAILED", "VALUE_OUT_OF_RANGE"};
 };
 
