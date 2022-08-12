@@ -15,6 +15,8 @@
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/FS/src",
                 "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/StreamDebugger-master",
+                "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/SHT31",
+                "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/TinyGSM/src",
                 "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/EspSoftwareSerial/src",
                 "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/PMS Library/src",
@@ -208,7 +210,6 @@
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/variants/esp32",
                 "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/lib/StreamDebugger-master",
                 "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/lib/TinyGSMWrapper",
-                "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/SHT31",
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -237,7 +238,6 @@
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                 "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 ""
             ],
             "browse": {
@@ -250,6 +250,8 @@
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/FS/src",
                     "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/StreamDebugger-master",
+                    "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/SHT31",
+                    "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/TinyGSM/src",
                     "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/EspSoftwareSerial/src",
                     "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/PMS Library/src",
@@ -443,7 +445,6 @@
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/variants/esp32",
                     "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/lib/StreamDebugger-master",
                     "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/lib/TinyGSMWrapper",
-                    "c:/Users/seand/OneDrive/Documents/GitHub/SurfSideScienceSensors/src/AirQualitySensor/ESP32_PMS5003_dev/.pio/libdeps/esp32dev/SHT31",
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -472,7 +473,6 @@
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                     "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                    "C:/Users/seand/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     ""
                 ]
             },

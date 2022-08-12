@@ -2,6 +2,7 @@
 #include "PMS.h"
 #include "SoftwareSerial.h"
 #include "StreamDebugger.h"
+#include "Wire.h"
 
 
 #define SAMPLES 5
@@ -43,7 +44,19 @@ PMS pms2(Serial_PM2, &name_pms2);
 String readData(PMS*, SoftwareSerial*);
 
 
-#include <tinygsmwrapper.h>
+#include "SHT31.h"
+
+#define SHT31_ADDRESS   0x44
+
+uint32_t start;
+uint32_t stop;
+
+SHT31 sht;
+
+String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop);
+
+
+#include "tinygsmwrapper.h"
 #define SENSOR_SAMPLES 10
 #define MONITORID "AIR_QUALITY_01"
 //voltage sensors
@@ -184,6 +197,8 @@ void doSleepCycle(uint32_t time_us = 1000000 * 5)
 
 void setup()
 {
+  sht.begin(SHT31_ADDRESS);
+
 Serial.begin(115200);
   // sensor enable power
 #ifdef HAS_SENSOR_ENABLE
@@ -264,6 +279,7 @@ void loop()
   int err = 0;
   String data1 = readData(&pms1, &Serial_PM1);
   String data2 = readData(&pms2, &Serial_PM2);
+  String data3 = ReadSHT31_data(&sht, &start, &stop);
   Serial.println("Sensor read delay: "+String(millis() - timer));
   #ifdef HAS_SENSOR_ENABLE
     digitalWrite(SENSOR_ENABLE_PIN, LOW);
@@ -283,6 +299,8 @@ void loop()
     payload += data1;
     payload += ",";
     payload += data2;
+    payload += ",";
+    payload += data3;
     payload += "]}";
     payload.replace("'", String('"'));
     err = mysim.post("surfside-db.brenchies.com",80,"/observations", payload,"application/json");
@@ -321,14 +339,6 @@ String readData(PMS *pms, SoftwareSerial *Serial_PM)
   Serial.println("Reading data...");
   if (pms->readUntil(data, SAMPLES))
   {
-    // Serial.println();
-    // Serial.println(pms->getName());
-    // Serial.print("PM 1.0 (ug/m3): ");
-    // Serial.println(data.PM_AE_UG_1_0);
-    // Serial.print("PM 2.5 (ug/m3): ");
-    // Serial.println(data.PM_AE_UG_2_5);
-    // Serial.print("PM 10.0 (ug/m3): ");
-    // Serial.println(data.PM_AE_UG_10_0);
 
     Serial.println();
     String pm1_0 = String(data.PM_SP_UG_1_0);
@@ -344,5 +354,23 @@ String readData(PMS *pms, SoftwareSerial *Serial_PM)
     message = "no data";
   }
   
+  return message;
+}
+
+String ReadSHT31_data(SHT31 *sht31, uint32_t *start, uint32_t *stop)
+{
+  String message;
+  if (sht31->isConnected())
+  {
+    *start = micros();
+    bool b = sht31->read();         // default = true/fast       slow = false
+    *stop = micros();
+    message +="{'sensorName':'Temperature','value':"+String(sht31->getTemperature())+",'unit':'°C'},"
+             +"{'sensorName':'Humidity','value':"+String(sht31->getHumidity())+",'unit':'%'}";
+  }
+  else
+  {
+    message ="Not connected";
+  }
   return message;
 }
