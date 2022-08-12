@@ -1,5 +1,10 @@
 #include "SHT31_SS.h"
 
+/**
+ * @brief Construct a new sht31 ss::sht31_SS object
+ * This default constructor also creates a new SHT31 object. 
+ * @param totalSamples Input ammount of samples to average per reading.
+ */
 SHT31_SS::SHT31_SS(int totalSamples)
 {
     SHT31 sht31;
@@ -28,12 +33,19 @@ void SHT31_SS::enableSensors(int trials = 3)
         else
         {
             this->_connectionStatus = ERROR_CONNECTION;
-            this->_sensor.data[TEMPERRATURE].errorStatus = Error_code[ERROR_CONNECTION];
-            this->_sensor.data[HUMIDITY].errorStatus = Error_code[ERROR_CONNECTION];
+            this->_sensor.data[TEMPERRATURE].statusCode = Status_code[ERROR_CONNECTION];
+            this->_sensor.data[HUMIDITY].statusCode = Status_code[ERROR_CONNECTION];
         }
+        delay(1000);
     }
 }
 
+/**
+ * @brief This function processess sensor measurements samples
+ * and gets the average of the total samples selected.
+ * Alos sets sensor statuses if there are any errors.
+ * 
+ */
 void SHT31_SS::processAvgSensorMeasurements()
 {
     this->_sht31->read();
@@ -50,98 +62,125 @@ void SHT31_SS::processAvgSensorMeasurements()
 
         if (!valueInRange(this->_sensor.data[TEMPERRATURE].value, TEMP_MIN, TEMP_MAX))
         {
-            this->_sensor.data[TEMPERRATURE].errorStatus = Error_code[ERROR_VALUE_OUT_OF_RANGE];
+            this->_sensor.data[TEMPERRATURE].statusCode = Status_code[ERROR_VALUE_OUT_OF_RANGE];
         }
         if (!valueInRange(this->_sensor.data[HUMIDITY].value, HUM_MIN, HUM_MAX))
         {
-            this->_sensor.data[HUMIDITY].errorStatus = Error_code[ERROR_VALUE_OUT_OF_RANGE];
+            this->_sensor.data[HUMIDITY].statusCode = Status_code[ERROR_VALUE_OUT_OF_RANGE];
         }
     }
 }
 
+/**
+ * @brief This functions allows you to acces sensors and their data types.
+ * 
+ * @return Sensor and their data types.
+ */
+Sensor SHT31_SS::getSensor()
+{
+    processAvgSensorMeasurements();
+
+    return this->_sensor;
+}
+
+/**
+ * @brief Checks if input value is in range
+ * 
+ * @param val input value
+ * @param min input min threshold
+ * @param max input max threshold
+ * @return true :if value is within range.
+ * @return false :if value is not within range.
+ */
 bool SHT31_SS::valueInRange(float val, float min, float max)
 {
     return ((val - min) <= (max - min)); // true, else false
 }
 
-// Sensor SHT31_SS::getSensor()
-// {
-//     this->_sensor.data[TEMPERRATURE].value = getAvgSensorSamples().value[TEMPERRATURE];
-//     this->_sensor.data[HUMIDITY].value = getAvgSensorSamples().value[HUMIDITY];
-
-//     if (valueInRange(this->_sensor.data[TEMPERRATURE].value, TEMP_MIN, TEMP_MAX))
-//     {
-//         this->_sensor.data[TEMPERRATURE].errorStatus = Error_code[ERROR_VALUE_OUT_OF_RANGE];
-//     }
-//     if (valueInRange(this->_sensor.data[HUMIDITY].value, HUM_MIN, HUM_MAX))
-//     {
-//         this->_sensor.data[HUMIDITY].errorStatus = Error_code[ERROR_VALUE_OUT_OF_RANGE];
-//     }
-
-//     return _sensor;
-// }
-
+/**
+ * @brief Processes the sensors data and compiles them in a JSON format stype of protocol.
+ * Reports sensors readings and error reports if there are any.
+ * @return String JSON in format.
+ */
 String SHT31_SS::getSensorPayload()
 {
     processAvgSensorMeasurements();
     String sensorData = ",";
-    for (int i = 0; i < TYPE_MEASUREMENTS; i++)
+    for (int i = 0; i < TOTAL_SENSORS; i++)
     {
-        if (this->_connectionStatus == ERROR_CONNECTION)
+        if (!this->_sht31->isConnected())
         {
-            sensorData += sensorErrorProtocol(this->_sensor.data[i].name, this->_sensor.data[i].errorStatus, i);
+            this->_sensor.data[i].statusCode = Status_code[ERROR_CONNECTION];
+            sensorData += sensorErrorProtocol(this->_sensor.data[i].name, this->_sensor.data[i].statusCode, i);
         }
         else
         {
-            if (this->_sensor.data[i].errorStatus == Error_code[ERROR_VALUE_OUT_OF_RANGE])
+            if (this->_sensor.data[i].statusCode == Status_code[ERROR_VALUE_OUT_OF_RANGE])
             {
-                sensorData += sensorErrorProtocol(this->_sensor.data[i].name, this->_sensor.data[i].errorStatus, i);
+                sensorData += sensorErrorProtocol(this->_sensor.data[i].name, this->_sensor.data[i].statusCode, i);
             }
             else
             {
-                sensorData += sensorProtocol(this->_sensor.data[i].name, String(this->_sensor.data[i].value), this->_sensor.data[i].errorStatus, i);
+                 this->_sensor.data[i].statusCode = Status_code[SUCCESS_CONNECTED];
+                sensorData += sensorProtocol(this->_sensor.data[i].name, String(this->_sensor.data[i].value), this->_sensor.data[i].unit, i);
             }
         }
-        delay(1000);
     }
 
     return sensorData;
 }
 
+/**
+ * @brief Formats sensor protocol in JSON.
+ * 
+ * @param name input sensor data type name.
+ * @param value input sensor value.
+ * @param unit input sensor unit type.
+ * @param index input sensor buffer index.
+ * @return String JSON string format of sensor data.
+ */
 String SHT31_SS::sensorProtocol(String name, String value, String unit, int index)
 {
     String sensorData;
 
     if (index < HUMIDITY)
     {
-        sensorData = "{'sensorName':'" + name + "'," +
-                     "  'value':" + value + "," +
-                     "  'unit':'" + unit + "'" +
+        sensorData = "{'sensorName':'"+name+"',"+
+                     "'value':"+value+","+
+                     "'unit':'"+unit+"'"+
                      "},";
     }
     else
     {
-        sensorData = "{'sensorName':'" + name + "'," +
-                     "  'value':" + value + "," +
-                     "  'unit':'" + unit + "'" +
+        sensorData = "{'sensorName':'"+name+"',"+
+                     "'value':"+value+","+
+                     "'unit':'"+unit+"'"+
                      "}";
     }
     return sensorData;
 }
 
+/**
+ * @brief Formats sensor error reporting protocol in JSON.
+ * 
+ * @param name input sensor data type name.
+ * @param errorType input sensor error type.
+ * @param index input sensor buffer index.
+ * @return String JSON string format of sensor error data.
+ */
 String SHT31_SS::sensorErrorProtocol(String name, String errorType, int index)
 {
     String sensorData;
     if (index < HUMIDITY)
     {
-        sensorData = "{'sensorName':'" + name + "'," +
-                     "  'error':" + errorType + "," +
+        sensorData = "{'sensorName':'"+name+"',"+
+                     "'error':"+errorType+","+
                      "},";
     }
     else
     {
-        sensorData = "{'sensorName':'" + name + "'," +
-                     "  'error':" + errorType + "," +
+        sensorData = "{'sensorName':'"+name+"',"+
+                     "'error':"+errorType+","+
                      "}";
     }
     return sensorData;
