@@ -42,12 +42,9 @@ public:
 
     int readSensorImpl(float *buffer, int *sensorstatus, long delay_)
     {
-        Serial.println("reading");
         if (isConnected())
         {
-            Serial.println("enabling");
             read();
-            Serial.println("reading2");
             buffer[0] = getTemperature();
             buffer[1] = getTemperature();
             sensorStatus[0] = SENSOR_BASE_SUCCESS;
@@ -66,8 +63,7 @@ public:
     {
         digitalWrite(ENABLEPIN, SENSOR_ENABLE_STATE);
         delay(sensorPwrDelay);
-        Serial.println("enabling");
-        int status_ = readSensorImpl(samplesBufferTemp, sensorStatus, 0);
+        int status_ = readSensorImpl(samplesBufferTemp, sensorstatus, 0);
         for (int i = 0; i < numberOfreadings; i++)
         {
             sensorstatus[i] = status_;
@@ -78,13 +74,12 @@ public:
     {
         digitalWrite(ENABLEPIN, !SENSOR_ENABLE_STATE);
         delay(sensorPwrDelay);
-        Serial.println("disabling");
-        int status_ = readSensorImpl(samplesBufferTemp, sensorStatus, 0);
+        int status_ = readSensorImpl(samplesBufferTemp, sensorstatus, 0) == SENSOR_BASE_FAIL? SENSOR_BASE_SUCCESS : SENSOR_BASE_FAIL;
         for (int i = 0; i < numberOfreadings; i++)
         {
-            sensorstatus[i] = !status_;
+            sensorstatus[i] = status_;
         }
-        return !status_;
+        return status_;
     }
 
     int calibrateSensorsImpl(int statusLed, int *sensorstatus)

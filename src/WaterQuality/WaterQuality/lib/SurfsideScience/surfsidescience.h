@@ -95,7 +95,7 @@ class surfSideScience{
         {
             if (sensor.status != SUCCESS)
             {
-                processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"','"+sensor.errorBuffer[i]+"'}");
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
                 sensor.errorBuffer[i] = "";
             }
 
@@ -121,7 +121,7 @@ class surfSideScience{
         {
             if (sensor.sensorStatus[i] != SUCCESS)
             {
-                processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"','"+sensor.errorBuffer[i]+"'}");
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
                 sensor.errorBuffer[i] = "";
             }
         }
@@ -144,13 +144,13 @@ class surfSideScience{
      * @param sensor 
      */
     template <typename sensorType>
-    void sampleSensor(sensorType sensor){
+    void sampleSensor(sensorType sensor){   
         float *data;
         sensor.getSamples();
         int numberOfreadings = sensor.numberOfreadings;
         for (int i = 0; i < numberOfreadings; i++){
             if(sensor.sensorStatus[i] != SUCCESS){
-                processErrorBuffer("{'sensorName': '"+sensor.sensorName[i]+"', 'error': '"+sensor.errorBuffer[i]+"'}");
+                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
                 sensor.errorBuffer[i] = "";
             }else{
                 if(sensorsData.length() > 0){sensorsData += ",";}
@@ -160,16 +160,11 @@ class surfSideScience{
     }
 
     template <typename modemType>
-    int postData(modemType Modem, bool reportRSSI=true){
+    int postData(modemType Modem){
         Serial.println("postData");
         Modem.enableModem();
         Modem.establishConnection();
         Modem.getTime();
-        if(reportRSSI){
-            int rssi = Modem.getSignalQuality();
-            if(sensorsData.length() > 0){sensorsData += ",";}
-            sensorsData += "{'sensorName':'RSSI','value':"+String(rssi)+",'unit':'NAN'}";
-        }
         generatePayload(Modem.dateTime);
         Serial.println(payload);
 
@@ -206,7 +201,6 @@ class surfSideScience{
 
     template <typename loggerType>
     int log(loggerType logger){
-        Serial.println("logger status: "+String(logger.status));
         if(logger.status == -1){return -1;}
         if(!payloadPosted){logger.writeTemp(payload);}
         logger.writeData(payload);
