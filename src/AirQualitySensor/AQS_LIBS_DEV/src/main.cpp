@@ -20,7 +20,6 @@ void loop()
 
 
 /*
-
 /**
  * @brief While UART connection between ESP32 and PMS sensor is stable.
  * A " read request " is sent to the PMS sensor. The PMS sensor then sends
@@ -29,7 +28,6 @@ void loop()
  * @param pms selected PMS sensor object
  * @param Serial_PM selected SoftwareSerial port object
  */
-
 /*
 
 String readData(PMS *pms, SoftwareSerial *Serial_PM)

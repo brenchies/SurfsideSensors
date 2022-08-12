@@ -160,11 +160,16 @@ class surfSideScience{
     }
 
     template <typename modemType>
-    int postData(modemType Modem){
+    int postData(modemType Modem, bool reportRSSI=true){
         Serial.println("postData");
         Modem.enableModem();
         Modem.establishConnection();
         Modem.getTime();
+        if(reportRSSI){
+            int rssi = Modem.getSignalQuality();
+            if(sensorsData.length() > 0){sensorsData += ",";}
+            sensorsData += "{'sensorName':'RSSI','value':"+String(rssi)+",'unit':'NAN'}";
+        }
         generatePayload(Modem.dateTime);
         Serial.println(payload);
 

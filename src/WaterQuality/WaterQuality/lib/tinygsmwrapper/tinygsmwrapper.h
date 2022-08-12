@@ -223,6 +223,10 @@ class TinyGSMWrapper{
     }
   }
 
+  int getSignalQuality(){
+      return modem.getSignalQuality();
+    }
+
   /**
    * @brief establish connnection
    * 
