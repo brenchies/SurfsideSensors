@@ -1,0 +1,10 @@
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\bin\Debug\AQS_DEMO.exe.config
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\bin\Debug\AQS_DEMO.exe
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\bin\Debug\AQS_DEMO.pdb
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.csprojAssemblyReference.cache
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.Properties.Resources.resources
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.csproj.GenerateResource.cache
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.csproj.CoreCompileInputs.cache
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.exe
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.pdb
+C:\Users\seand\OneDrive\Documents\GitHub\SurfSideScienceSensors\src\AirQualitySensor\Demo_NetForms\AQS_DEMO\AQS_DEMO\obj\Debug\AQS_DEMO.AQS_Demo_Form.resources
