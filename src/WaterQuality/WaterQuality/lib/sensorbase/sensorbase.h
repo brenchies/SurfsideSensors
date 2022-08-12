@@ -1,7 +1,7 @@
+#pragma once
 #ifndef SENSOR_BASE_H
     #define SENSOR_BASE_I2C_H
     #include <Arduino.h>
-    #pragma once
     #ifndef BASE_SENSORS_DEFAULT_NR_SENSORS
         #define BASE_SENSORS_DEFAULT_NR_READINGS 10
     #endif
@@ -21,9 +21,14 @@
      * int numberOfreadings;
      * unsinged long sensorStabilizeDelay[i];
      * int sensorReadingDecimals[i];
-     * String EXPECTED_VALUE_RANGE[i][0]=low;
-     * EXPECTED_VALUE_RANGE[i][1]=max;
+     * float EXPECTED_VALUE_MIN[i]]=low;
+     * float EXPECTED_VALUE_MAX[i]=max;
      * 
+     * overwrite the following function:
+     * virtual int readSensorImpl(float *buffer, int *sensorstatus, long delay_)
+     * virtual int enableSensorsImpl(int *sensorstatus)
+     * virtual int disableSensorsImpl(int *sensorstatus)
+     * virtual int calibrateSensorsImpl(int statusLed, int *sensorstatus)
      * where i is the elemnet index 
      */
     class sensorBase{
@@ -36,6 +41,9 @@
          */
         int numberOfreadings = 0;
 
+        int SENSOR_BASE_SUCCESS = 1;
+        int SENSOR_BASE_FAIL = -1;
+
         /**
          * @brief name of sensor array
          * 
@@ -47,6 +55,7 @@
          * 
          */
         String samplesBuffer[BASE_SENSORS_DEFAULT_NR_READINGS];
+        float samplesBufferTemp[BASE_SENSORS_DEFAULT_NR_READINGS];
 
         /**
          * @brief units of each sensor
@@ -67,7 +76,7 @@
         String errorBuffer[BASE_SENSORS_DEFAULT_NR_READINGS];
 
         /**
-         * @brief status SUCCESS = 1, ERROR = -1
+         * @brief status SENSOR_BASE_SUCCESS = 1, ERROR = -1
          * 
          */
         int status;
@@ -91,10 +100,16 @@
         bool SENSOR_ENABLE_STATE = HIGH;
         
         /**
-         * @brief range of expected values
+         * @brief min of expected values
          * 
          */
-        float EXPECTED_VALUE_RANGE[BASE_SENSORS_DEFAULT_NR_READINGS][2];;
+        float EXPECTED_VALUE_MIN[BASE_SENSORS_DEFAULT_NR_READINGS];
+
+        /**
+         * @brief max of expected values
+         * 
+         */
+        float EXPECTED_VALUE_MAX[BASE_SENSORS_DEFAULT_NR_READINGS];
 
         /**
          * @brief condition to check if value is in expected range
@@ -141,12 +156,12 @@
          * @return true 
          * @return false 
          */
-        bool valueInRange(float val, float min_range=-100000, float max_range=100000){
-            float min_ = min_range, max_ = max_range;
-            if(min_range < 0){
+        bool valueInRange(float val, int index){
+            float min_ = EXPECTED_VALUE_MIN[index], max_ = EXPECTED_VALUE_MAX[index];
+            if(min_ < 0){
+                max_ -= min_;
+                val -= min_;
                 min_ = 0;
-                max_ = max_range - min_range;
-                val -= min_range;
             }
             if (val >= min_ && val <= max_){
                 return true;
@@ -157,7 +172,6 @@
 
         /**
          * @brief read sensor implementation
-         * sum the current value to the buffer
          * report sensor status
          * 
          * @param delay_ 
@@ -179,29 +193,33 @@
         /**
          * @brief get the samples, do average, report read error
          * 
-         * @return int [1, -1]
+         * @return int
          */
         int getSamples(){
             for(int i=0; i < numberOfreadings; i++){samplesTemp[i] = 0;}
-            status = 1;
+            status = SENSOR_BASE_SUCCESS;
             //read samples
             for(int i = 0; i < averagingSamples; i++){
-                readSensorImpl(samplesTemp, sensorStatus, sampleReadDelay);
+                readSensorImpl(samplesBufferTemp, sensorStatus, sampleReadDelay);
+                for(int i2=0; i2 < numberOfreadings; i2++){
+                    samplesTemp[i2] += samplesBufferTemp[i2];
+                }
             }
+
             //process samples and sensor status
             for(int i=0; i < numberOfreadings; i++){
-                if (sensorStatus[i] == 1)
+                if (sensorStatus[i] == SENSOR_BASE_SUCCESS)
                 {
                     samplesTemp[i] /= averagingSamples;
                     samplesBuffer[i] = String(samplesTemp[i], sensorReadingDecimals[i]);
-                    if(checkValueInRange && !valueInRange(samplesTemp[i], EXPECTED_VALUE_RANGE[i][0], EXPECTED_VALUE_RANGE[i][1])){
-                        sensorStatus[i] = -1;
-                        status = -1;
-                        processErrorBuffer(i, "value out of range ["+String(EXPECTED_VALUE_RANGE[i][0])+","+String(EXPECTED_VALUE_RANGE[i][1])+"]: "+String(samplesTemp[i]));
+                    if(checkValueInRange && !valueInRange(samplesTemp[i], i)){
+                        sensorStatus[i] = SENSOR_BASE_FAIL;
+                        status = SENSOR_BASE_FAIL;
+                        processErrorBuffer(i, "value out of range ["+String(EXPECTED_VALUE_MIN[i])+","+String(EXPECTED_VALUE_MAX[i])+"]: "+String(samplesTemp[i]));
                     }
                 }else{
                     processErrorBuffer(i, "read error");
-                    status = -1;
+                    status = SENSOR_BASE_FAIL;
                 }
             }
             return status;
@@ -209,7 +227,7 @@
 
         /**
          * @brief enable sensors implmentation
-         * return 1:all sensors anabled, -1: some or all sensors enable failed
+         * return 1:all sensors anabled, -1: some or all sensors enable SENSOR_BASE_fail
          * 
          * @return int 
          */
@@ -228,8 +246,8 @@
             {
                 status = enableSensorsImpl(sensorStatus);
                 for(int i2=0; i2 < numberOfreadings;i2++){
-                    if(sensorStatus[i2]==1){
-                        status_ += 1;
+                    if(sensorStatus[i2]==SENSOR_BASE_SUCCESS){
+                        status_ += SENSOR_BASE_SUCCESS;
                     }
                 }
                 if(status_ == numberOfreadings){
@@ -238,18 +256,24 @@
             }
             
             for(int i=0; i < numberOfreadings; i++){
-                if(sensorStatus[i] == -1){
-                    processErrorBuffer(i, "enable failed");
-                    status = -1;
+                if(sensorStatus[i] == SENSOR_BASE_FAIL){
+                    processErrorBuffer(i, "enable fail");
+                    status = SENSOR_BASE_FAIL;
                 }
             }
 
-            if (status != 1){
+            if (status != SENSOR_BASE_SUCCESS){
                 disableSensors();
             }
             return status;
         }
         
+        /**
+         * @brief disable sensor implementation
+         * 
+         * @param sensorstatus 
+         * @return int 
+         */
         virtual int disableSensorsImpl(int *sensorstatus){ return 0;};
 
 
@@ -263,28 +287,29 @@
             for(int i=0; i<trials;i++)
             {
                 status = disableSensorsImpl(sensorStatus);
-                if(status == 1){
+                if(status == SENSOR_BASE_SUCCESS){
                     break;
                 }
             }
 
             for(int i=0; i < numberOfreadings; i++){
-                if(sensorStatus[i] == -1)
+                if(sensorStatus[i] == SENSOR_BASE_FAIL)
                 {
-                    processErrorBuffer(i, "disable failed");
-                    status = -1;
+                    processErrorBuffer(i, "disable fail");
+                    status = SENSOR_BASE_FAIL;
                 }
             }
             return status;
         }
 
         /**
-         * @brief seensor calibration function implementation
+         * @brief sensor calibration function implementation
          * 
          * @param statusLed ( 0 if no status led)
+         * @param sensorstatus 
          * @return int 
          */
-        virtual int calibrateSensorsImpl(int statusLed){ return 0;};
+        virtual int calibrateSensorsImpl(int statusLed, int *sensorstatus){ return 0;};
 
         /**
          * @brief begin sensor calibration process
@@ -292,7 +317,15 @@
          * @param statusLedPin (0 if no status led)
          */
         int calibrate(int statusLedPin=0){
-            return calibrateSensorsImpl(statusLedPin);
+            calibrateSensorsImpl(statusLedPin, sensorStatus);
+            for(int i=0; i < numberOfreadings; i++){
+                if(sensorStatus[i] == SENSOR_BASE_FAIL)
+                {
+                    processErrorBuffer(i, "calibration fail");
+                    status = SENSOR_BASE_FAIL;
+                }
+            }
+            return status;
         }
     };
 #endif
