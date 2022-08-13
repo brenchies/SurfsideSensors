@@ -319,7 +319,8 @@ class TinyGSMWrapper{
       if(status != 1){
         errorBuffer = "|incorrect status code: "+String(status)+", expected: "+String(SUCCESSCODE)+"|";
       }
-      return status;
+      
     }
+    return status;
   }
 };
