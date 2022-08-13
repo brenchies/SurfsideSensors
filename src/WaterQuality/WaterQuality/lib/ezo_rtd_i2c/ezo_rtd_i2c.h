@@ -23,10 +23,10 @@
             sensorName[0] = sensorname;
             units[0] = unit;
             numberOfreadings = 1;
-            sensorStabilizeDelay[0] = 3000;
+            sensorStabilizeDelay[0] = 28600;
             sensorReadingDecimals[0] = 3;
-            EXPECTED_VALUE_MIN[0] = 0;
-            EXPECTED_VALUE_MAX[0] = 100;
+            EXPECTED_VALUE_MIN[0] = -126.000;
+            EXPECTED_VALUE_MAX[0] = 1254;
             sensorName[0] = sensorname;
             i2c_address = address;
 

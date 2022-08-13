@@ -1,12 +1,10 @@
-#ifndef EZO_RTD_I2C_H
-    #define EZO_RTD_I2C_H
+#ifndef EZO_PH_I2C_H
+    #define EZO_PH_I2C_H
     #include <Ezo_i2c.h>
     #include <sensorbase.h>
 
-    class ezo_rtd_i2c: public sensorBase{
+    class ezo_ph_i2c: public sensorBase, public Ezo_board{
         public:
-        Ezo_board *SENSOR_OBJECT;
-
         /**
          * @brief begin function, sensor arguments
          * 
@@ -15,7 +13,7 @@
          * @param sensorName 
          * @param unit 
          */
-        void begin(int enablePin=13, uint8_t i2c_address=0x6, float oversamples=5, String sensorname="PH", String unit="NAN"){
+        ezo_ph_i2c(int enablePin=13, uint8_t address=0x63, float oversamples=5, String sensorname="PH", String unit="NAN") : Ezo_board(address, sensorname.c_str()){
             ENABLEPIN = enablePin;
             averagingSamples = oversamples;
             checkValueInRange = true;
@@ -25,18 +23,17 @@
             sensorName[0] = sensorname;
             units[0] = unit;
             numberOfreadings = 1;
-            sensorStabilizeDelay[0] = 3000;
+            sensorStabilizeDelay[0] = 2100;
             sensorReadingDecimals[0] = 3;
-            EXPECTED_VALUE_RANGE[0][0] = 0;
-            EXPECTED_VALUE_RANGE[0][1] = 100;
+            EXPECTED_VALUE_MIN[0] = 0.001;
+            EXPECTED_VALUE_MAX[0] = 14.000;
+            sensorName[0] = sensorname;
+            i2c_address = address;
 
-            // this->sensorName[0] = sensorname;
             if(enablePin != 0){
                 pinMode(enablePin, OUTPUT);
                 digitalWrite(enablePin, !SENSOR_ENABLE_STATE);
             }
-            Ezo_board sensor_object = Ezo_board(i2c_address, sensorname.c_str());
-            SENSOR_OBJECT = &sensor_object;
                         
         }
 
@@ -51,13 +48,13 @@
         
         int readSensorImpl(float *buffer, int *sensorstatus, long delay_){
             int status_ = 0;
-            SENSOR_OBJECT->send_read_cmd();
+            send_read_cmd();
             delay(delay_);
-            SENSOR_OBJECT->receive_read_cmd(); 
-            float val = SENSOR_OBJECT->get_last_received_reading();
-            status_ = SENSOR_OBJECT->get_error() == SENSOR_OBJECT->SUCCESS? 1: -1;
+            receive_read_cmd(); 
+            float val = get_last_received_reading();
+            status_ = get_error() == SUCCESS? SENSOR_BASE_SUCCESS: SENSOR_BASE_FAIL;
             sensorstatus[0] = status_;
-            buffer[0] += val;
+            buffer[0] = val;
             return status_;
         }
 
@@ -70,27 +67,23 @@
         int enableSensorsImpl(int *sensorstatus){
             digitalWrite(ENABLEPIN, SENSOR_ENABLE_STATE);
             delay(sensorPwrDelay);
-            int status_ = readSensorImpl(samplesTemp, sensorstatus, sampleReadDelay);
+            readSensorImpl(samplesTemp, sensorstatus, sampleReadDelay);
+            int status_ = sensorstatus[0];
             return status_;
         }
 
         int disableSensorsImpl(int *sensorstatus){
             digitalWrite(ENABLEPIN, !SENSOR_ENABLE_STATE);
             delay(sensorPwrDelay);
-            int status_ = 0;
             readSensorImpl(samplesTemp, sensorstatus, sampleReadDelay);
-            for(int i=0; i < numberOfreadings; i++){
-                status_ += sensorStatus[i];
-                if(sensorstatus[i] == -1){
-                    sensorstatus[i] = 1;
-                }
-            }
-            status_ = status_ == -numberOfreadings? 1: -1;
-            return status_;
+            int status_ = sensorstatus[0] == SENSOR_BASE_FAIL? SENSOR_BASE_SUCCESS: SENSOR_BASE_FAIL;
+            sensorstatus[0] = status_;
+            return sensorstatus[0];
         }
 
-        int calibrateSensorsImpl(int statusLed){
-            return 0;
+        int calibrateSensorsImpl(int statusLed,int *sensorstatus){
+            sensorstatus[0] = SENSOR_BASE_SUCCESS;
+            return SENSOR_BASE_SUCCESS;
         }
     };
 #endif

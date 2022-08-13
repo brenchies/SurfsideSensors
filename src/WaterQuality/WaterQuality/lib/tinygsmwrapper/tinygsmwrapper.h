@@ -163,6 +163,7 @@ class TinyGSMWrapper{
         Serial.println("enabling success");
         break;
       }
+      Serial.println("Enable MODEM failed trials: "+String(i)+"/"+String(trials));
     }
     if (status == -1){
       processErrorBuffer("enable failed trials: "+String(trials));
@@ -175,7 +176,7 @@ class TinyGSMWrapper{
    * 
    * @param trials 
    */
-  int disableModem(int trials=5){
+  int disableModem(int trials=20){
     for(int i = 0; i < trials; i++){
       Serial.println("disabling modem");
       sendPwrPulse(200, false);
@@ -185,6 +186,7 @@ class TinyGSMWrapper{
       if(status == 1){
         break;
       }
+      Serial.println("disable MODEM failed trials: "+String(i)+"/"+String(trials));
     }
     if (status == -1){
       processErrorBuffer("disable failed trials: "+String(trials));
@@ -221,6 +223,16 @@ class TinyGSMWrapper{
         dateTime = datetime;
         break;
     }
+  }
+
+  /**
+   * @brief Get the Signal Quality object
+   * 
+   * @return int 
+   */
+  int getSignalQuality()
+  {
+    return modem.getSignalQuality();
   }
 
   /**
@@ -262,47 +274,52 @@ class TinyGSMWrapper{
    * @return int 
    */
   int postData(String payload, int trials=3){
-    for(int i = 0; i < trials; i++){
+    for(int i = 0; i < trials; i++)
+    {
       if(!gprsReady){establishConnection();}
       HttpClient http(client, SERVER, PORT);
-        SerialMon.print(F("Performing HTTP POST request... "));
-        int err = http.post(POSTPATH, CONTENTTYPE, payload);
-        if (err != 0) {
-            SerialMon.println(F("failed to connect"));
-            SerialMon.println(err);
-            return -1;
-        }
-        int status = http.responseStatusCode();
-    SerialMon.print(F("Response status code: "));
-    SerialMon.println(status);
-    if (!status) {
-      return -1;
-    }
+      SerialMon.print(F("Performing HTTP POST request... "));
+      int err = http.post(POSTPATH, CONTENTTYPE, payload);
+      if (err != 0) {
+          SerialMon.println(F("failed to connect"));
+          SerialMon.println(err);
+          return -1;
+      }
+      int status_ = http.responseStatusCode();
+      SerialMon.print(F("Response status code: "));
+      SerialMon.println(status_);
+      if (!status_) {
+        errorBuffer = "|received error code: "+String(status)+"|";
+        return -1;
+      }
 
-    SerialMon.println(F("Response Headers:"));
-    while (http.headerAvailable()) {
-      String headerName  = http.readHeaderName();
-      String headerValue = http.readHeaderValue();
-      SerialMon.println("    " + headerName + " : " + headerValue);
-    }
+      SerialMon.println(F("Response Headers:"));
+      while (http.headerAvailable()) {
+        String headerName  = http.readHeaderName();
+        String headerValue = http.readHeaderValue();
+        SerialMon.println("    " + headerName + " : " + headerValue);
+      }
 
-    int length = http.contentLength();
-    if (length >= 0) {
-      SerialMon.print(F("Content length is: "));
-      SerialMon.println(length);
-    }
-    if (http.isResponseChunked()) {
-      SerialMon.println(F("The response is chunked"));
-    }
+      int length = http.contentLength();
+      if (length >= 0) {
+        SerialMon.print(F("Content length is: "));
+        SerialMon.println(length);
+      }
+      if (http.isResponseChunked()) {
+        SerialMon.println(F("The response is chunked"));
+      }
 
-    String body = http.responseBody();
-    SerialMon.println(F("Response:"));
-    SerialMon.println(body);
+      String body = http.responseBody();
+      SerialMon.println(F("Response:"));
+      SerialMon.println(body);
 
-    SerialMon.print(F("Body length is: "));
-    SerialMon.println(body.length());
-    return status != SUCCESSCODE ? -1: 1;
+      SerialMon.print(F("Body length is: "));
+      SerialMon.println(body.length());
+      status = status_ != SUCCESSCODE ? -1: 1;
+      if(status != 1){
+        errorBuffer = "|incorrect status code: "+String(status)+", expected: "+String(SUCCESSCODE)+"|";
+      }
+      return status;
     }
-    return 0;
   }
 };

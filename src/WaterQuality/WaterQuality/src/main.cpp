@@ -5,9 +5,9 @@
 #include <sdlogger.h>
 #include <ezo_rtd_i2c.h>
 #include <voltagesensor.h>
-// #include <ezo_do_i2c.h>
-// #include <ezo_ec_i2c.h>
-// #include <ezo_ph_i2c.h>
+#include <ezo_do_i2c.h>
+#include <ezo_ec_i2c.h>
+#include <ezo_ph_i2c.h>
 
 //t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
 int numberOfSensors = 2;
@@ -25,27 +25,34 @@ surfSideScience myscience("WATER_QUALITY_01");
 TinyGSMWrapper mysim;
 sdlogger mylogger;
 ezo_rtd_i2c myRTD;
-// ezo_ec_i2c myEC;
-// ezo_ph_i2c myPH;
-// ezo_do_i2c myDO;
-voltageSensor mySOLAR(numberOfSensors,pinNumber,sensorname,voltageSenseFactor,min_,max_,unit,numberOfSamples,sampleRead_delay, decimals);
+ezo_ec_i2c myEC;
+ezo_ph_i2c myPH;
+ezo_do_i2c myDO;
+voltageSensor voltageSensors(numberOfSensors,pinNumber,sensorname,voltageSenseFactor,min_,max_,unit,numberOfSamples,sampleRead_delay, decimals);
 
 
+void go_to_sleep(){
+  ESP.deepSleep(1000000*60*60);
+}
 void setup() {
   // put your setup code here, to run once:
+  uint32_t timer = millis();
   Wire.begin();
   Serial.begin(115200);
   mysim.begin();
   mylogger.begin();
-  #define sleep_ 1000000*60*60
-  // myscience.processSensors<ezo_rtd_i2c, ezo_ec_i2c,ezo_ph_i2c,ezo_do_i2c>(myRTD, myEC,myPH, myDO);
-   myscience.processSensors(myRTD, mySOLAR);
-  // myscience.postData(mysim);
-  // myscience.log(mylogger);
+  myPH.enableSensors();
+
+  myscience.processSensors(voltageSensors);
+  myscience.processSensors(myEC,myDO);
+  myscience.processSensors(myPH, myRTD);
+  myscience.postData(mysim);
+  myscience.log(mylogger);
 
   Serial.println("going to sleep");
-   
-  ESP.deepSleep(sleep_);
+  timer = millis() - timer;
+  mylogger.writeToSD(String(timer), "timerOn.txt");
+  go_to_sleep();
 }
 
 

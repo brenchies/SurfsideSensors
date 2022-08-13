@@ -64,7 +64,7 @@
         String units[BASE_SENSORS_DEFAULT_NR_READINGS];
 
         /**
-         * @brief delay to wait for sensor to stabilize
+         * @brief delay to wait for sensor to stabilize (ms)
          * 
          */
         unsigned long sensorStabilizeDelay[BASE_SENSORS_DEFAULT_NR_READINGS];

@@ -160,7 +160,7 @@ class surfSideScience{
     }
 
     template <typename modemType>
-    int postData(modemType Modem){
+    int postData(modemType Modem, bool reportRSSI=true){
         Serial.println("postData");
         Modem.enableModem();
         Modem.establishConnection();
@@ -169,14 +169,22 @@ class surfSideScience{
         Serial.println(payload);
 
         if (Modem.status == ERROR){
-            errorBuffer += "{deviceName: "+Modem.deviceName+","+Modem.errorBuffer+"},";
+            processErrorBuffer("{'deviceName': '"+Modem.deviceName+"', 'error':"+Modem.errorBuffer+"}");
             payloadPosted = false;
         }else{
+            if(reportRSSI)
+            {
+                int rssi = Modem.getSignalQuality();
+                if(sensorsData.length() > 0){sensorsData += ",";}
+                sensorsData += "{'sensorName':'RSSI','value':"+String(rssi)+",'unit':'NAN'}";
+            }
             
             Modem.postData(payload);
             if(Modem.status == ERROR){
+                payloadPosted = false;
+                processErrorBuffer("{'deviceName': '"+Modem.deviceName+"', 'error':"+Modem.errorBuffer+"}");
+            }else{
                 payloadPosted = true;
-                errorBuffer += "{: "+Modem.deviceName+","+Modem.errorBuffer+"},";
             }
         }
         Modem.disableModem();
