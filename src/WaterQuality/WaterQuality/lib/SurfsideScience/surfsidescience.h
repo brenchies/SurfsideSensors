@@ -15,7 +15,7 @@ class surfSideScience{
      * @brief 
      * 
      */
-    String deviceName="WATER_QUALITY_01";
+    String deviceName="AIR_QUALITY_01";
 
     /**
      * @brief error strings {err, }
@@ -95,7 +95,7 @@ class surfSideScience{
         {
             if (sensor.status != SUCCESS)
             {
-                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"','"+sensor.errorBuffer[i]+"'}");
                 sensor.errorBuffer[i] = "";
             }
 
@@ -121,7 +121,7 @@ class surfSideScience{
         {
             if (sensor.sensorStatus[i] != SUCCESS)
             {
-                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"','"+sensor.errorBuffer[i]+"'}");
                 sensor.errorBuffer[i] = "";
             }
         }
@@ -144,13 +144,13 @@ class surfSideScience{
      * @param sensor 
      */
     template <typename sensorType>
-    void sampleSensor(sensorType sensor){   
+    void sampleSensor(sensorType sensor){
         float *data;
         sensor.getSamples();
         int numberOfreadings = sensor.numberOfreadings;
         for (int i = 0; i < numberOfreadings; i++){
             if(sensor.sensorStatus[i] != SUCCESS){
-                processErrorBuffer("{sensorName: "+sensor.sensorName[i]+","+sensor.errorBuffer[i]+"}");
+                processErrorBuffer("{'sensorName': '"+sensor.sensorName[i]+"', 'error': '"+sensor.errorBuffer[i]+"'}");
                 sensor.errorBuffer[i] = "";
             }else{
                 if(sensorsData.length() > 0){sensorsData += ",";}
@@ -160,7 +160,7 @@ class surfSideScience{
     }
 
     template <typename modemType>
-    int postData(modemType Modem){
+    int postData(modemType Modem, bool reportRSSI=true){
         Serial.println("postData");
         Modem.enableModem();
         Modem.establishConnection();
@@ -169,14 +169,22 @@ class surfSideScience{
         Serial.println(payload);
 
         if (Modem.status == ERROR){
-            errorBuffer += "{deviceName: "+Modem.deviceName+","+Modem.errorBuffer+"},";
+            processErrorBuffer("{'deviceName': '"+Modem.deviceName+"', 'error':"+Modem.errorBuffer+"}");
             payloadPosted = false;
         }else{
+            if(reportRSSI)
+            {
+                int rssi = Modem.getSignalQuality();
+                if(sensorsData.length() > 0){sensorsData += ",";}
+                sensorsData += "{'sensorName':'RSSI','value':"+String(rssi)+",'unit':'NAN'}";
+            }
             
             Modem.postData(payload);
             if(Modem.status == ERROR){
+                payloadPosted = false;
+                processErrorBuffer("{'deviceName': '"+Modem.deviceName+"', 'error':"+Modem.errorBuffer+"}");
+            }else{
                 payloadPosted = true;
-                errorBuffer += "{: "+Modem.deviceName+","+Modem.errorBuffer+"},";
             }
         }
         Modem.disableModem();
@@ -201,6 +209,7 @@ class surfSideScience{
 
     template <typename loggerType>
     int log(loggerType logger){
+        Serial.println("logger status: "+String(logger.status));
         if(logger.status == -1){return -1;}
         if(!payloadPosted){logger.writeTemp(payload);}
         logger.writeData(payload);

@@ -46,7 +46,7 @@ public:
         {
             read();
             buffer[0] = getTemperature();
-            buffer[1] = getTemperature();
+            buffer[1] = getHumidity();
             sensorStatus[0] = SENSOR_BASE_SUCCESS;
             sensorStatus[1] = SENSOR_BASE_SUCCESS;
             return SENSOR_BASE_SUCCESS;

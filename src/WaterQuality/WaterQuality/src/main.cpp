@@ -5,8 +5,16 @@
 #include <sdlogger.h>
 #include <voltagesensor.h>
 #include "SHT31_S.h"
+#include "PMS_SS.h"
+
 
 //t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
+
+surfSideScience myscience("AIR_QUALITY_01");
+TinyGSMWrapper mysim;
+sdlogger mylogger;
+
+
 int numberOfSensors = 2;
 int pinNumber[] = {36, 35};
 String sensorname[] = {"SOLAR_VIN", "BATTERY_VIN"};
@@ -20,16 +28,30 @@ int decimals=3;
 
 
 int enablepin = 13;
-String sensorname2[] = {"Temperature", "Humidity"}; 
-String unit2[] = {"°C","%"};
-int numberOfSamples2 = 10;
-long sampleRead_delay2 = 50;
-surfSideScience myscience("WATER_QUALITY_01");
-TinyGSMWrapper mysim;
-sdlogger mylogger;
-voltageSensor voltageSensors(numberOfSensors,pinNumber,sensorname,voltageSenseFactor,min_,max_,unit,numberOfSamples,sampleRead_delay, decimals);
-SHT31_S sht31(enablepin,sensorname2,unit,numberOfSamples2, sampleRead_delay2,decimals);
 
+String sensornameSht[] = {"Temperature", "Humidity"}; 
+String unitSht[] = {"°C","%"};
+int numberOfSamplesSht = 10;
+long sampleRead_delaySht = 50;
+
+String sensornamePM1[] = {"PM 1.0(PMS 1)", "PM 2.5(PMS 1)", "PM 10.0(PMS 1)"}; 
+String unitPM[] = {"μg/m3","μg/m3","μg/m3"};
+int numberOfSamplesPM = 10;
+long sampleRead_delayPM = 50;
+
+
+voltageSensor voltageSensors(numberOfSensors,pinNumber,sensorname,voltageSenseFactor,min_,max_,unit,numberOfSamples,sampleRead_delay, decimals);
+SHT31_S sht31(enablepin,sensornameSht,unitSht,numberOfSamplesSht, sampleRead_delaySht,decimals);
+PMS_SS pmss;
+
+
+
+#include "PMS.h"
+#include"SoftwareSerial.h"
+
+SoftwareSerial pmsSerial;
+PMS pms1(pmsSerial);
+PMS ::DATA data1;
 void go_to_sleep(){
   ESP.deepSleep(1000000*60*60);
 }
@@ -40,18 +62,23 @@ void setup() {
   mysim.begin();
   mylogger.begin();
   sht31.begin();
-  // sht31.getSamples();
-  myscience.processSensors(voltageSensors, sht31);
+  pmss.begin(33, 32, enablepin,sensornamePM1,unitPM,numberOfSamplesPM, sampleRead_delayPM,decimals);
+  // myscience.processSensors(voltageSensors);
+  myscience.processSensors(pmss, sht31);
   myscience.postData(mysim);
   myscience.log(mylogger);
 
   Serial.println("going to sleep");
    
-  go_to_sleep();
+  // go_to_sleep();
 }
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
+  delay(2000);
 }
+
+//  voltage:   4,09
+//  Time:     9:22 pm
+//  Date:     12 august 2022

@@ -19,7 +19,8 @@
         "istream": "cpp",
         "ostream": "cpp",
         "wire.h": "c",
-        "new": "cpp"
+        "new": "cpp",
+        "utility": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
