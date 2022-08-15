@@ -7,7 +7,6 @@
 #include "SHT31_S.h"
 #include "PMS_SS.h"
 
-
 //t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
 
 surfSideScience myscience("AIR_QUALITY_01");
@@ -27,7 +26,7 @@ long sampleRead_delay=50;
 int decimals=3;
 
 
-int enablepin = 13;
+int enablepin = 12;
 
 String sensornameSht[] = {"Temperature", "Humidity"}; 
 String unitSht[] = {"°C","%"};
@@ -53,7 +52,7 @@ SoftwareSerial pmsSerial;
 PMS pms1(pmsSerial);
 PMS ::DATA data1;
 void go_to_sleep(){
-  ESP.deepSleep(1000000*60*60);
+  ESP.deepSleep(1000000*60*1);
 }
 void setup() {
   // put your setup code here, to run once:
@@ -69,8 +68,7 @@ void setup() {
   myscience.log(mylogger);
 
   Serial.println("going to sleep");
-   
-  // go_to_sleep();
+  go_to_sleep();
 }
 
 

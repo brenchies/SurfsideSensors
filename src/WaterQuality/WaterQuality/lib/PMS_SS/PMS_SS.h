@@ -69,6 +69,7 @@ public:
         {
             sensorStatus[0] = SENSOR_BASE_FAIL;
             sensorStatus[1] = SENSOR_BASE_FAIL;
+            sensorStatus[2] = SENSOR_BASE_FAIL;
             return SENSOR_BASE_FAIL;
         }
     }
