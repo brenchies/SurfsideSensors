@@ -261,10 +261,6 @@
                     status = SENSOR_BASE_FAIL;
                 }
             }
-
-            if (status != SENSOR_BASE_SUCCESS){
-                disableSensors();
-            }
             return status;
         }
         

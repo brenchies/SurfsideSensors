@@ -32,26 +32,28 @@ voltageSensor voltageSensors(numberOfSensors,pinNumber,sensorname,voltageSenseFa
 
 
 void go_to_sleep(){
-  ESP.deepSleep(1000000*60*60);
+  ESP.deepSleep(1000000*60*10);
 }
 void setup() {
   // put your setup code here, to run once:
-  uint32_t timer = millis();
+  //Vbat== 4.18 8/13/2022
+  pinMode(32, OUTPUT);
+  digitalWrite(32, HIGH);
+  uint32_t timer1, timer2, timer3;
   Wire.begin();
   Serial.begin(115200);
   mysim.begin();
   mylogger.begin();
-  myPH.enableSensors();
-
-  myscience.processSensors(voltageSensors);
-  myscience.processSensors(myEC,myDO);
-  myscience.processSensors(myPH, myRTD);
+  timer2 = millis();
+  myscience.processSensors(voltageSensors, myEC,myDO,myPH, myRTD);
+  timer2 = millis() - timer2;
+  timer3 = millis();
   myscience.postData(mysim);
   myscience.log(mylogger);
+  timer3 = millis() - timer3;
 
   Serial.println("going to sleep");
-  timer = millis() - timer;
-  mylogger.writeToSD(String(timer), "timerOn.txt");
+  mylogger.writeToSD("timer1: "+String(timer1)+" timer2: "+String(timer2)+" timer3: "+String(timer3), "timerOn.txt");
   go_to_sleep();
 }
 
