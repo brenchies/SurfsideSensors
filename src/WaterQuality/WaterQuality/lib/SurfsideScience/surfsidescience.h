@@ -52,7 +52,7 @@
          * @param deviceId String
          */
         surfSideScience(String devicename){
-            deviceName = deviceName;
+            deviceName = devicename;
         }
 
         /**
