@@ -5,6 +5,12 @@
 
     class ezo_rtd_i2c: public sensorBase, public Ezo_board{
         public:
+
+        /**
+         * @brief signle point calibration temperatur in C
+         * 
+         */
+        float calibration_temperature = 30;
         /**
          * @brief begin function, sensor arguments
          * 
@@ -81,7 +87,25 @@
             return sensorstatus[0];
         }
 
-        int calibrateSensorsImpl(int statusLed,int *sensorstatus){
+        int calibrateSensorsImpl(int statusLed,int *sensorstatus, int buttonPin){
+            String T_calibrate = "Cal,"+String(calibration_temperature, 2);
+            Serial.println(T_calibrate);
+            send_cmd("Cal,clear");
+            delay(1000);
+            send_cmd(T_calibrate.c_str());
+            delay(1000);
+            send_cmd("cal,?");
+            delay(1000);
+            char buf[32];
+            receive_cmd(buf, 32);
+            Serial.println(String(buf));
+            bool isCalibrated = String(buf).indexOf("CAL,1") > 0;
+            if(!isCalibrated){
+                processErrorBuffer(0, "calibration Fail T: "+String(calibration_temperature, 2)+" calibration response: "+String(buf));
+                sensorstatus[0] = SENSOR_BASE_FAIL;
+                return SENSOR_BASE_FAIL;
+            }
+            Serial.println(sensorName[0]+" calibrated T: "+String(calibration_temperature));
             sensorstatus[0] = SENSOR_BASE_SUCCESS;
             return SENSOR_BASE_SUCCESS;
         }

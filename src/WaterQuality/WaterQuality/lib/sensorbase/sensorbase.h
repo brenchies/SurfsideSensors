@@ -305,15 +305,16 @@
          * @param sensorstatus 
          * @return int 
          */
-        virtual int calibrateSensorsImpl(int statusLed, int *sensorstatus){ return 0;};
+        virtual int calibrateSensorsImpl(int statusLed, int *sensorstatus, int buttonPin){ return 0;};
 
         /**
          * @brief begin sensor calibration process
          * 
          * @param statusLedPin (0 if no status led)
+         * @param ButtonPin (0 if no status led)
          */
-        int calibrate(int statusLedPin=0){
-            calibrateSensorsImpl(statusLedPin, sensorStatus);
+        int calibrate(int statusLedPin=0, int buttonPin=0){
+            calibrateSensorsImpl(statusLedPin, sensorStatus, buttonPin);
             for(int i=0; i < numberOfreadings; i++){
                 if(sensorStatus[i] == SENSOR_BASE_FAIL)
                 {

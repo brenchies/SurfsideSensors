@@ -84,7 +84,7 @@ class sdlogger{
       myFile = SD.open("/"+fileName, FILE_APPEND);
       myFile.println(data);
       myFile.close();
-      Serial.println(data);
+     
     }else{
       return -1;
     }

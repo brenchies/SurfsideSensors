@@ -45,14 +45,15 @@ void setup() {
   mysim.begin();
   mylogger.begin();
   timer2 = millis();
-  myscience.processSensors(voltageSensors, myEC,myDO,myPH, myRTD);
+  myscience.processSensors(voltageSensors, myRTD, myPH, myEC, myDO);
   timer2 = millis() - timer2;
   timer3 = millis();
-  myscience.postData(mysim);
-  myscience.log(mylogger);
+  // myscience.postData(mysim);
+  // myscience.log(mylogger);
   timer3 = millis() - timer3;
 
   Serial.println("going to sleep");
+   Serial.println("timer1: "+String(timer1)+" timer2: "+String(timer2)+" timer3: "+String(timer3));
   mylogger.writeToSD("timer1: "+String(timer1)+" timer2: "+String(timer2)+" timer3: "+String(timer3), "timerOn.txt");
   go_to_sleep();
 }

@@ -2,9 +2,17 @@
     #define EZO_EC_I2C_H
     #include <Ezo_i2c.h>
     #include <sensorbase.h>
+    #include <ezo_rtd_i2c.h>
 
     class ezo_ec_i2c: public sensorBase, public Ezo_board{
         public:
+        bool temperature_compensation = true;
+        uint8_t ezo_rtd_i2c_address = 0x66;
+        ezo_rtd_i2c RTD_TEMP_COMPENSATION;
+        bool isTcompensated = false;
+        float cal_high = 80000;
+        float cal_low = 12880;
+
         /**
          * @brief begin function, sensor arguments
          * 
@@ -37,6 +45,27 @@
                         
         }
 
+        int compensateTemperature(){
+            if(temperature_compensation && !isTcompensated){
+                isTcompensated = true;
+                RTD_TEMP_COMPENSATION.getSamples();
+                float temperature = RTD_TEMP_COMPENSATION.samplesTemp[0];
+                String T_compensate = "T,"+String(temperature, 2);
+                send_cmd(T_compensate.c_str());
+                delay(1000);
+                send_cmd("T,?");
+                char buf[32];
+                delay(1000);
+                receive_cmd(buf, 32);
+                bool compensation_confirmed = String(buf).indexOf(String(temperature, 2)) > 0;
+                if (!compensation_confirmed){
+                    processErrorBuffer(0, "temperature compensation Fail T: "+String(temperature, 2)+" calibration response: "+String(buf));
+                    return SENSOR_BASE_FAIL;
+                }
+            }
+            return SENSOR_BASE_SUCCESS;
+        }
+
         /**
          * @brief read sensor implementation
          * sum the current value to the buffer
@@ -47,6 +76,13 @@
          */
         
         int readSensorImpl(float *buffer, int *sensorstatus, long delay_){
+
+            if(compensateTemperature() == SENSOR_BASE_FAIL){
+                sensorstatus[0] = SENSOR_BASE_FAIL;
+                buffer[0] = SENSOR_BASE_FAIL;
+                return SENSOR_BASE_FAIL;
+            }
+
             int status_ = 0;
             send_read_cmd();
             delay(delay_);
@@ -81,9 +117,59 @@
             return sensorstatus[0];
         }
 
-        int calibrateSensorsImpl(int statusLed,int *sensorstatus){
+        int calibrateSensorsImpl(int statusLed,int *sensorstatus, int buttonPin){
+            String dry_calibrate = "Cal,dry";
+            String low_calibrate = "Cal,low"+String(cal_low, 2);
+            String high_calibrate = "Cal,high"+String(cal_high, 2);
+            pinMode(buttonPin, INPUT);
+            pinMode(statusLed, OUTPUT);
+            digitalWrite(statusLed, HIGH);
+            send_cmd("Cal,clear");
+            Serial.println("Calibration dry calibration ec: "+String(low_calibrate));
+            int pinState = digitalRead(buttonPin);
+            while(digitalRead(buttonPin) != pinState){
+                getSamples();
+                Serial.println("toggle pin to begin current ec value: "+String(samplesTemp[0]));
+                delay(1000);
+            }
+            digitalWrite(statusLed, LOW);
+            send_cmd(dry_calibrate.c_str());
+            digitalWrite(statusLed, HIGH);
+            Serial.println("Calibration low calibration ec: "+String(low_calibrate));
+            pinState = digitalRead(buttonPin);
+            while(digitalRead(buttonPin) != pinState){
+                getSamples();
+                Serial.println("toggle pin to begin current ec value: "+String(samplesTemp[0]));
+                delay(1000);
+            }
+            digitalWrite(statusLed, LOW);
+            send_cmd(low_calibrate.c_str());
+            digitalWrite(statusLed, HIGH);
+            Serial.println("Calibration high calibration ec: "+String(high_calibrate));
+            pinState = digitalRead(buttonPin);
+            while(digitalRead(buttonPin) != pinState){
+                getSamples();
+                Serial.println("toggle pin to begin current ec value: "+String(samplesTemp[0]));
+                delay(1000);
+            }digitalWrite(statusLed, LOW);
+            send_cmd(high_calibrate.c_str());
+
+            delay(1000);
+            send_cmd("Cal,?");
+            delay(1000);
+            char buf[32];
+            receive_cmd(buf, 32);
+            Serial.println(String(buf));
+            bool isCalibrated = String(buf).indexOf("CAL,2") > 0;
+            if(!isCalibrated){
+                processErrorBuffer(0, "calibration Fail calibration response: "+String(buf));
+                sensorstatus[0] = SENSOR_BASE_FAIL;
+                return SENSOR_BASE_FAIL;
+            }
+            Serial.println(sensorName[0]+" ph calibrated "+String(buf));
             sensorstatus[0] = SENSOR_BASE_SUCCESS;
             return SENSOR_BASE_SUCCESS;
+
         }
     };
 #endif
