@@ -1,0 +1,26 @@
+{
+    "files.associations": {
+        "surfscienceenums.h": "c",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "memory": "cpp",
+        "random": "cpp",
+        "initializer_list": "cpp",
+        "*.tpp": "cpp",
+        "cmath": "cpp",
+        "ezo_i2c.h": "c",
+        "arduino.h": "c",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "wire.h": "c",
+        "new": "cpp",
+        "utility": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}

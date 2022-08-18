@@ -7,6 +7,7 @@
 #include "SHT31_S.h"
 #include "PMS_SS.h"
 #include "PMS_SSS.h"
+#include "SPS30_SS.h"
 
 //t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
 
@@ -37,8 +38,11 @@ String unitPM[] = {"μg/m3","μg/m3","μg/m3"};
 
 String sensornamePM2[] = {"PM 1.0(PMS 2)", "PM 2.5(PMS 2)", "PM 10.0(PMS 2)"}; 
 
+String sensornameSps30[] = {"PM 1.0(SPS 1)", "PM 2.5(SPS 1)", "PM 10.0(SPS 1)"}; ; 
+
 voltageSensor voltageSensors(numberOfSensors,pinNumber,sensorname,voltageSenseFactor,min_,max_,unit,numberOfSamples,sampleRead_delay, decimals);
 SHT31_S sht31(enablepin,sensornameSht,unitSht,numberOfSamplesSht, sampleRead_delaySht,decimals);
+SPS30_SS sps30(enablepin, sensornameSps30, unitPM);
 PMS_SS pms1;
 PMS_SSS pms2;
 
@@ -54,10 +58,8 @@ void setup() {
   sht31.begin();
   pms1.begin(33, 32, enablepin,sensornamePM1,unitPM,numberOfSamples, sampleRead_delay);
   pms2.begin(35, 34, enablepin,sensornamePM2,unitPM,numberOfSamples, sampleRead_delay,0,1);
-  myscience.processSensors(pms1, sht31);
-  myscience.processSensors(pms2); 
-
-  myscience.processSensors(voltageSensors);  //must go at last
+  //sps30.begin(&Wire);
+  myscience.processSensors(sht31 ,pms1, pms2, voltageSensors); //must go at last
   myscience.postData(mysim);
   myscience.log(mylogger);
 

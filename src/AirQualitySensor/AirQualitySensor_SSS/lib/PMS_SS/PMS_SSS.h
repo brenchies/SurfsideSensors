@@ -1,19 +1,19 @@
-#ifndef PMS_SS_H
-#define PMS_SS_H
+#ifndef PMS_SSS_H
+#define PMS_SSS_H
 #include <sensorbase.h>
 #include <Arduino.h>
 #include "PMS.h"
 #include "SoftwareSerial.h"
-SoftwareSerial serial;
+SoftwareSerial serial2;
 
 enum 
 {
-    PM1_0,
-    PM2_5,
-    PM10_0
+    PM_1_0,
+    PM_2_5,
+    PM_10_0
 };
 
-class PMS_SS : public sensorBase
+class PMS_SSS : public sensorBase
 {
 public:
     PMS *pms;
@@ -29,8 +29,8 @@ public:
         sensorPwrDelay = 500;
         numberOfreadings = 3;
         index_ = index;
-        serial.begin(9600, SWSERIAL_8N1, rxPin, txPin, false, 192);
-        PMS pms_(serial);
+        serial2.begin(9600, SWSERIAL_8N1, rxPin, txPin, false, 192);
+        PMS pms_(serial2);
            pms = &pms_;
         for (int i = 0; i < numberOfreadings; i++)
         {
@@ -54,19 +54,19 @@ public:
         pms->requestRead();
         if (pms->readUntil(pms_data, 2000))
         {
-            buffer[PM1_0] = pms_data.PM_SP_UG_1_0;
-            buffer[PM2_5] = pms_data.PM_SP_UG_2_5;
-            buffer[PM10_0] = pms_data.PM_SP_UG_10_0;
-            sensorStatus[PM1_0] = SENSOR_BASE_SUCCESS;
-            sensorStatus[PM2_5] = SENSOR_BASE_SUCCESS;
-            sensorStatus[PM10_0] = SENSOR_BASE_SUCCESS;
+            buffer[PM_1_0] = pms_data.PM_SP_UG_1_0;
+            buffer[PM_2_5] = pms_data.PM_SP_UG_2_5;
+            buffer[PM_10_0] = pms_data.PM_SP_UG_10_0;
+            sensorStatus[PM_1_0] = SENSOR_BASE_SUCCESS;
+            sensorStatus[PM_2_5] = SENSOR_BASE_SUCCESS;
+            sensorStatus[PM_10_0] = SENSOR_BASE_SUCCESS;
             return SENSOR_BASE_SUCCESS;
         }
         else
         {
-            sensorStatus[PM1_0] = SENSOR_BASE_FAIL;
-            sensorStatus[PM2_5] = SENSOR_BASE_FAIL;
-            sensorStatus[PM10_0] = SENSOR_BASE_FAIL;
+            sensorStatus[PM_1_0] = SENSOR_BASE_FAIL;
+            sensorStatus[PM_2_5] = SENSOR_BASE_FAIL;
+            sensorStatus[PM_10_0] = SENSOR_BASE_FAIL;
             return SENSOR_BASE_FAIL;
         }
     }

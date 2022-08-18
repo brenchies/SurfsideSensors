@@ -1,25 +1,23 @@
-#ifndef PMS_SS_H
-#define PMS_SS_H
+#ifndef SPS30_SS_H
+#define SPS30_SS_H
 #include <sensorbase.h>
 #include <Arduino.h>
-#include "PMS.h"
-#include "SoftwareSerial.h"
-SoftwareSerial serial;
+#include "sps30.h"
+#define INCLUDE_I2C // define I2C communication for SPS30
 
-enum 
-{
-    PM1_0,
-    PM2_5,
-    PM10_0
-};
-
-class PMS_SS : public sensorBase
+class SPS30_SS : public sensorBase, private SPS30
 {
 public:
-    PMS *pms;
-    PMS::DATA pms_data;
-    int index_;
-    void begin(int rxPin, int txPin, int enablepin, String sensorname[], String unit[], int numberOfSamples = 10, long sampleRead_delay = 50, int decimals = 0, int index = 0)
+    enum Sensors
+    {
+        SPS_PM1,
+        SPS_PM2_5,
+        SPS_PM10_0
+    };
+
+    struct sps_values pm;
+
+    SPS30_SS(int enablepin, String sensorname[], String unit[], int numberOfSamples = 10, long sampleRead_delay = 50, int decimals = 0) : SPS30()
     {
         ENABLEPIN = enablepin;
         averagingSamples = numberOfSamples;
@@ -28,10 +26,6 @@ public:
         SENSOR_ENABLE_STATE = HIGH;
         sensorPwrDelay = 500;
         numberOfreadings = 3;
-        index_ = index;
-        serial.begin(9600, SWSERIAL_8N1, rxPin, txPin, false, 192);
-        PMS pms_(serial);
-           pms = &pms_;
         for (int i = 0; i < numberOfreadings; i++)
         {
             sensorName[i] = sensorname[i];
@@ -47,26 +41,30 @@ public:
             pinMode(ENABLEPIN, OUTPUT);
             digitalWrite(ENABLEPIN, HIGH);
         }
+        if (ENABLEPIN != 0)
+        {
+            pinMode(ENABLEPIN, OUTPUT);
+        }
     }
 
     int readSensorImpl(float *buffer, int *sensorstatus, long delay_)
     {
-        pms->requestRead();
-        if (pms->readUntil(pms_data, 2000))
+        uint8_t ret = GetValues(&pm);
+        if (ret != SPS30_ERR_OK)
         {
-            buffer[PM1_0] = pms_data.PM_SP_UG_1_0;
-            buffer[PM2_5] = pms_data.PM_SP_UG_2_5;
-            buffer[PM10_0] = pms_data.PM_SP_UG_10_0;
-            sensorStatus[PM1_0] = SENSOR_BASE_SUCCESS;
-            sensorStatus[PM2_5] = SENSOR_BASE_SUCCESS;
-            sensorStatus[PM10_0] = SENSOR_BASE_SUCCESS;
+            buffer[0] = pm.MassPM1;
+            buffer[1] = pm.MassPM2;
+            buffer[2] = pm.MassPM10;
+            sensorStatus[0] = SENSOR_BASE_SUCCESS;
+            sensorStatus[1] = SENSOR_BASE_SUCCESS;
+            sensorStatus[2] = SENSOR_BASE_SUCCESS;
             return SENSOR_BASE_SUCCESS;
         }
         else
         {
-            sensorStatus[PM1_0] = SENSOR_BASE_FAIL;
-            sensorStatus[PM2_5] = SENSOR_BASE_FAIL;
-            sensorStatus[PM10_0] = SENSOR_BASE_FAIL;
+            sensorStatus[0] = SENSOR_BASE_FAIL;
+            sensorStatus[1] = SENSOR_BASE_FAIL;
+            sensorStatus[2] = SENSOR_BASE_FAIL;
             return SENSOR_BASE_FAIL;
         }
     }
@@ -75,8 +73,6 @@ public:
     {
         digitalWrite(ENABLEPIN, SENSOR_ENABLE_STATE);
         delay(sensorPwrDelay);
-        pms->activeMode();
-        pms->wakeUp();
         int status_ = readSensorImpl(samplesBufferTemp, sensorstatus, 0);
         for (int i = 0; i < numberOfreadings; i++)
         {
