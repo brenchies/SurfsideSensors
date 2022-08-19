@@ -8,12 +8,13 @@
 #include <ezo_do_i2c.h>
 #include <ezo_ec_i2c.h>
 #include <ezo_ph_i2c.h>
+#include <esp_task_wdt.h>
 
 //t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
 int numberOfSensors = 2;
 int pinNumber[] = {36, 35};
 String sensorname[] = {"SOLAR_VIN", "BATTERY_VIN"};
-float voltageSenseFactor[] = {1,1};
+float voltageSenseFactor[] = {4200/2395.600, 4200/2395.600};
 float max_[] = {6000, 5000};
 float min_[] = {0,0};
 String unit[] = {"mV", "mV"};
@@ -32,16 +33,22 @@ voltageSensor voltageSensors(numberOfSensors,pinNumber,sensorname,voltageSenseFa
 
 
 void go_to_sleep(){
-  ESP.deepSleep(1000000*60*10);
+  Serial.println("Sleeping for: 3600 seconds");
+  ESP.deepSleep(1000000*60*60);
 }
 void setup() {
-  // put your setup code here, to run once:
-  //Vbat== 4.18 8/13/2022
-  pinMode(32, OUTPUT);
-  digitalWrite(32, HIGH);
+  // pinMode(32, OUTPUT);
+  // digitalWrite(32, HIGH);
+  
   uint32_t timer1, timer2, timer3;
   Wire.begin();
   Serial.begin(115200);
+
+  esp_task_wdt_init(60*10, true); //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+  Serial.println("WDT enabled timeoute: "+String(60*10)+" s");
+
+
   mysim.begin();
   mylogger.begin();
   timer2 = millis();
@@ -54,6 +61,7 @@ void setup() {
 
   Serial.println("going to sleep");
   mylogger.writeToSD("timer1: "+String(timer1)+" timer2: "+String(timer2)+" timer3: "+String(timer3), "timerOn.txt");
+  esp_task_wdt_deinit();
   go_to_sleep();
 }
 

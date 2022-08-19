@@ -166,8 +166,7 @@
             Modem.enableModem();
             Modem.establishConnection();
             Modem.getTime();
-            generatePayload(Modem.dateTime);
-            Serial.println(payload);
+            
 
             if (Modem.status == ERROR){
                 processErrorBuffer("{'deviceName': '"+Modem.deviceName+"', 'error':"+Modem.errorBuffer+"}");
@@ -179,7 +178,8 @@
                     if(sensorsData.length() > 0){sensorsData += ",";}
                     sensorsData += "{'sensorName':'RSSI','value':"+String(rssi)+",'unit':'NAN'}";
                 }
-                
+                generatePayload(Modem.dateTime);
+                Serial.println(payload);
                 Modem.postData(payload);
                 if(Modem.status == ERROR){
                     payloadPosted = false;

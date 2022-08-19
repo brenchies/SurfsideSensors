@@ -210,6 +210,7 @@
           Serial.println(SerialAT.readString());
           Serial.println(modem.getGSMDateTime(format));
           modem.getNetworkTime(&year, &month, &day, &hour, &minute, &second, &timezone);
+          timezone = 4;
           String timezoneStr = String(timezone);
           timezoneStr.replace(".", ":");
           String datetime = String(year)+"-"+\
@@ -318,6 +319,10 @@
         status = status_ != SUCCESSCODE ? -1: 1;
         if(status != 1){
           errorBuffer = "|incorrect status code: "+String(status)+", expected: "+String(SUCCESSCODE)+"|";
+        }else
+        {
+          Serial.println("Post success trials: "+String(i));
+          return status;
         }
         
       }

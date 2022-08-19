@@ -19,7 +19,8 @@
         "istream": "cpp",
         "ostream": "cpp",
         "wire.h": "c",
-        "new": "cpp"
+        "new": "cpp",
+        "sensorbase.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
