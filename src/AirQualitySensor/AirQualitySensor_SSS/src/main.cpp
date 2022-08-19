@@ -8,7 +8,7 @@
 #include "PMS_SS.h"
 #include "PMS_SSS.h"
 #include "SPS30_SS.h"
-
+#include "esp_task_wdt.h"
 //t=7:49pm  vbat: 4.21 //8am vBat=4.15  approx blife==20*12hrs=10days
 
 surfSideScience myscience("AIR_QUALITY_01");
@@ -47,23 +47,30 @@ PMS_SS pms1;
 PMS_SSS pms2;
 
 void go_to_sleep(){
-  ESP.deepSleep(1000000*60*1);
+  ESP.deepSleep(1000000*60*10);
 }
 void setup() {
   // put your setup code here, to run once:
   Wire.begin();
   Serial.begin(115200);
+
+  esp_task_wdt_init(60*10, true);
+  esp_task_wdt_add(NULL);
+  Serial.println("Now enabled timeout" +String(60*10)+ "s");
+
+
   mysim.begin();
   mylogger.begin();
   sht31.begin();
   pms1.begin(33, 32, enablepin,sensornamePM1,unitPM,numberOfSamples, sampleRead_delay);
   pms2.begin(35, 34, enablepin,sensornamePM2,unitPM,numberOfSamples, sampleRead_delay,0,1);
   //sps30.begin(&Wire);
-  myscience.processSensors(sht31 ,pms1, pms2, voltageSensors); //must go at last
+  myscience.processSensors(sht31 ,pms1, pms2); //must go at last
   myscience.postData(mysim);
   myscience.log(mylogger);
 
   Serial.println("going to sleep");
+  esp_task_wdt_deinit();
   go_to_sleep();
 }
 
