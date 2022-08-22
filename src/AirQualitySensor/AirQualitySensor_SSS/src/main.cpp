@@ -47,17 +47,17 @@ PMS_SS pms1;
 PMS_SSS pms2;
 
 void go_to_sleep(){
-  ESP.deepSleep(1000000*60*10);
+ESP.deepSleep(1000000*60*60);
 }
 void setup() {
   // put your setup code here, to run once:
+  //unsigned long loop_time = millis();
   Wire.begin();
   Serial.begin(115200);
 
   esp_task_wdt_init(60*10, true);
   esp_task_wdt_add(NULL);
   Serial.println("Now enabled timeout" +String(60*10)+ "s");
-
 
   mysim.begin();
   mylogger.begin();
@@ -71,6 +71,8 @@ void setup() {
 
   Serial.println("going to sleep");
   esp_task_wdt_deinit();
+  //loop_time = millis();
+  //Serial.println(loop_time);
   go_to_sleep();
 }
 

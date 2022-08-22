@@ -319,6 +319,11 @@ class TinyGSMWrapper{
       if(status != 1){
         errorBuffer = "|incorrect status code: "+String(status)+", expected: "+String(SUCCESSCODE)+"|";
       }
+      else 
+      {
+        Serial.println("Post success trials: "+String(i));
+        return status;
+      }
     }
     return status;
   }
