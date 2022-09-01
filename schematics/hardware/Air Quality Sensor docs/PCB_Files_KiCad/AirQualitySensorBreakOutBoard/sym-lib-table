@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "SurfSideScienceAQS")(type "KiCad")(uri "${KIPRJMOD}/SurfSideScienceAQS.kicad_sym")(options "")(descr ""))
+)
