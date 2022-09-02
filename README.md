@@ -10,7 +10,7 @@ MCU specifc classes that are used are the sleep function and the watchdog timer 
 ## The surfsidescience class has three main methods
 
 template typename... sensorType <br>
-void processSensors(sensorType&... sensors)\
+void processSensors(sensorType&... sensors)<br>
 This method handles the sensors in the followwing way:
 - turn sensors on
 - read the sensors
@@ -27,8 +27,8 @@ This method handles the modem in the following way:
 - disable modem
 - collect errors from modem
 
-template typename loggerType
-int log(loggerType logger)<br />
+template typename loggerType<br>
+int log(loggerType logger)<br>
 This method handles the logger in the following way:
 - write data to temporary file if data was not uploaded
 - write data to data file
