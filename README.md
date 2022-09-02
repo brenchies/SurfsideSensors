@@ -56,6 +56,14 @@ Furthermore the follwing variables have to be modified accroding to the users ne
 - float EXPECTED_VALUE_MIN[i]=low;
 - float EXPECTED_VALUE_MAX[i]=max;
 
+# Dependencies
+- robtillaart/SHT31@^0.3.6
+- vshymanskyy/TinyGSM@^0.11.5
+- arduino-libraries/ArduinoHttpClient@^0.4.0
+- mulmer89/EZO I2C Sensors@1.0.0+32e1eda
+- vshymanskyy/StreamDebugger@^1.0.1
+- plerup/EspSoftwareSerial@^6.16.1
+- fu-hsi/PMS Library@^1.1.0
 
 # TODO
 - standerdize the modem class to a more generic type, since this is currently not structured in a user friendly way
