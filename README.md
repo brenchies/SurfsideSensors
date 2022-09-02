@@ -12,7 +12,7 @@ MCU specifc classes that are used are the sleep function and the watchdog timer 
 template<typename... sensorType> \
 void processSensors(sensorType&... sensors) \
 This method handles the sensors in the followwing way-> \
-- turn sesnors on
+- turn sensors on
 - read the sensors
 - turn off the sensors
 - collect errors from the sensors
