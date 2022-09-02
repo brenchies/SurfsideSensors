@@ -56,7 +56,7 @@ Furthermore the follwing variables have to be modified accroding to the users ne
 - float EXPECTED_VALUE_MIN[i]=low;
 - float EXPECTED_VALUE_MAX[i]=max;
 
-# Dependencies
+# Dependencies 
 - robtillaart/SHT31@^0.3.6
 - vshymanskyy/TinyGSM@^0.11.5
 - arduino-libraries/ArduinoHttpClient@^0.4.0
