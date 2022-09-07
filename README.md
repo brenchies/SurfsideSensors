@@ -1,6 +1,6 @@
 # Project scope
 The idea behind this project was to create a sensor module that is easy to replicate and upgraded.
-The easiest way to achieve this was to have an object oriented appreach, in which everything from the sesnors to the communiction devices are defined as an object.
+The easiest way to achieve this was to have an object oriented approach, in which everything from the sesnors to the communiction devices are defined as an object.
 This meant that we had deal with generic types and in case of some cases even variadic generic types, which a combination that you don't generally come accross.
 To solve this, templates and ellipses were used, during the creation of the surfsidescience class which is the class that handles the generic types.
 
