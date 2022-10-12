@@ -114,7 +114,7 @@
             {
                 if (sensor.status != SUCCESS)
                 {
-                    processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"','"+sensor.errorBuffer[i]+"'}");
+                    processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"', 'error':'"+sensor.errorBuffer[i]+"'}");
                     sensor.errorBuffer[i] = "";
                 }
 
@@ -140,7 +140,7 @@
             {
                 if (sensor.sensorStatus[i] != SUCCESS)
                 {
-                    processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"','"+sensor.errorBuffer[i]+"'}");
+                    processErrorBuffer("{'sensorName':'"+sensor.sensorName[i]+"', 'error':'"+sensor.errorBuffer[i]+"'}");
                     sensor.errorBuffer[i] = "";
                 }
             }
