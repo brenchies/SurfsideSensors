@@ -119,6 +119,7 @@
         }
       }
       if(success_count != 0){
+        modem.setNetworkMode(13);
         return 1;
       }
       return -1;
@@ -153,13 +154,13 @@
         sendPwrPulse(200, true);
         status = isModemAlive(1);
         if(status == 1){
-          Serial.println("enabling success");
+          Serial.println("enabled modem successfully");
           break;
         }
-        Serial.println("Enable MODEM failed trials: "+String(i)+"/"+String(trials));
+        Serial.println("enable modem failed attempt: "+String(i+1)+"/"+String(trials));
       }
       if (status == -1){
-        processErrorBuffer("enable failed trials: "+String(trials));
+        processErrorBuffer("enable modem total failed attempts: "+String(trials));
       }
       return status;
     }
@@ -179,10 +180,10 @@
         if(status == 1){
           break;
         }
-        Serial.println("disable MODEM failed trials: "+String(i)+"/"+String(trials));
+        Serial.println("disable modem failed attempt: "+String(i+1)+"/"+String(trials));
       }
       if (status == -1){
-        processErrorBuffer("disable failed trials: "+String(trials));
+        processErrorBuffer("disable modem total failed attempts: "+String(trials));
       }
       return status;
     }
@@ -238,11 +239,11 @@
     int establishConnection(int trials=3){
         if (gprsReady){return 1;}
 
-        SerialMon.print(F("Connecting to "));
-        SerialMon.print(APN);
+        SerialMon.print(F("connecting to "));
+        SerialMon.println(APN);
         for(int i = 0; i < trials; i++){
             if (!modem.gprsConnect(APN, GPRSUSER, GPRSPASS)) {
-            SerialMon.println("GPRS connection fail Trial: "+String(i)+"/"+String(trials));
+            SerialMon.println("GPRS connection failed attempt: "+String(i+1)+"/"+String(trials));
             gprsReady = false;
           }else{
             break;
@@ -272,7 +273,7 @@
       {
         if(!gprsReady){establishConnection();}
         HttpClient http(client, SERVER, PORT);
-        SerialMon.print(F("Performing HTTP POST request... "));
+        SerialMon.print(F("performing HTTP POST request... "));
         int err = http.post(POSTPATH, CONTENTTYPE, payload);
         if (err != 0) {
             SerialMon.println(F("failed to connect"));
@@ -280,14 +281,14 @@
             return -1;
         }
         int status_ = http.responseStatusCode();
-        SerialMon.print(F("Response status code: "));
+        SerialMon.print(F("response status code: "));
         SerialMon.println(status_);
         if (!status_) {
           errorBuffer = "|received error code: "+String(status)+"|";
           return -1;
         }
 
-        SerialMon.println(F("Response Headers:"));
+        SerialMon.println(F("response headers:"));
         while (http.headerAvailable()) {
           String headerName  = http.readHeaderName();
           String headerValue = http.readHeaderValue();
@@ -296,25 +297,25 @@
 
         int length = http.contentLength();
         if (length >= 0) {
-          SerialMon.print(F("Content length is: "));
+          SerialMon.print(F("content length is: "));
           SerialMon.println(length);
         }
         if (http.isResponseChunked()) {
-          SerialMon.println(F("The response is chunked"));
+          SerialMon.println(F("the response is chunked"));
         }
 
         String body = http.responseBody();
-        SerialMon.println(F("Response:"));
+        SerialMon.println(F("response:"));
         SerialMon.println(body);
 
-        SerialMon.print(F("Body length is: "));
+        SerialMon.print(F("body length is: "));
         SerialMon.println(body.length());
         status = status_ != SUCCESSCODE ? -1: 1;
         if(status != 1){
           errorBuffer = "|incorrect status code: "+String(status)+", expected: "+String(SUCCESSCODE)+"|";
         }else
         {
-          Serial.println("Post success trials: "+String(i));
+          Serial.println("post success on attempt: "+String(i+1));
           return status;
         }
         
