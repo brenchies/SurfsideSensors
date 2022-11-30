@@ -18,7 +18,7 @@
 #include "PMS_SSS.h"
 //#include "SPS30_SS.h" (Open for future implementation)
 
-surfSideScience myscience("AIR_QUALITY_01"); // Change module name here if you are re creating anothe module ex: "AIR_QUALITY_02"
+surfSideScience myscience("AIR_QUALITY_00"); // Change module name here if you are re creating anothe module ex: "AIR_QUALITY_02"
 TinyGSMWrapper mysim; // tinyGSMwrapper objcet for communication
 sdlogger mylogger;// SDlogger for logging data in SD card
 
